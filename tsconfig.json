@@ -1,0 +1,29 @@
+{
+  "include": ["env.d.ts", "vite.config.d.ts", "src/**/*"],
+  "exclude": ["node_modules", "dist"],
+
+  "compilerOptions": {
+    // 编译目标：生成的 JS 代码版本
+    "target": "es6",
+    // 模块系统：如何组织代码
+    "module": "esnext",
+    // 包含的标准库：提供内置对象的类型定义
+    "lib": ["ES2015", "DOM", "WebWorker"],
+    "allowJs": true,
+    // 跳过库文件检查：提高编译速度
+    "skipLibCheck": true,
+    // ES 模块互操作：允许默认导入 CommonJS 模块
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    // 模块解析(查找)策略
+    "moduleResolution": "node",
+    // 是否允许导入 JSON 文件
+    "resolveJsonModule": false,
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["@types/webgl2"]
+  }
+}

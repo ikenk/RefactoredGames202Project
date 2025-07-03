@@ -1,0 +1,38 @@
+{
+  "name": "refactored-games202-project",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "build:staging": "vite build --mode staging",
+    "build:analyze": "vite build --mode production -- --analyze",
+    "preview": "vite preview",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "format": "prettier --write \"src/**/*.{js,json,css,html}\"",
+    "format:check": "prettier --check \"src/**/*.{js,json,css,html}\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dat.gui": "^0.7.9",
+    "dotenv": "^17.0.1",
+    "gl-matrix": "^3.4.3",
+    "imgui": "^1.0.10",
+    "three": "^0.177.0"
+  },
+  "devDependencies": {
+    "@types/dat.gui": "^0.7.13",
+    "@types/node": "^24.0.3",
+    "@types/three": "^0.177.0",
+    "@types/webgl2": "^0.0.11",
+    "eslint": "^8.57.1",
+    "globals": "^16.2.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  }
+}
