@@ -3,27 +3,20 @@
   "exclude": ["node_modules", "dist"],
 
   "compilerOptions": {
-    // 编译目标：生成的 JS 代码版本
-    "target": "es6",
-    // 模块系统：如何组织代码
-    "module": "esnext",
-    // 包含的标准库：提供内置对象的类型定义
-    "lib": ["ES2015", "DOM", "WebWorker"],
-    "allowJs": true,
-    // 跳过库文件检查：提高编译速度
-    "skipLibCheck": true,
-    // ES 模块互操作：允许默认导入 CommonJS 模块
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    // 模块解析(查找)策略
-    "moduleResolution": "node",
-    // 是否允许导入 JSON 文件
-    "resolveJsonModule": false,
-
+    "target": "es6", // 编译目标：生成的 JS 代码版本
+    "module": "esnext", // 模块系统：如何组织代码
+    "lib": ["ES2015", "DOM", "WebWorker"], // 包含的标准库：提供内置对象的类型定义
+    "allowJs": true, // 允许 TypeScript 处理 .js 文件
+    "noEmit": true, // 只做类型检查，不输出文件
+    "skipLibCheck": true, // 跳过库文件检查：提高编译速度
+    "esModuleInterop": true, // ES 模块互操作：允许默认导入 CommonJS 模块
+    "allowSyntheticDefaultImports": true, // 处理CommonJS模块导入兼容性问题
+    "moduleResolution": "node", // 模块解析(查找)策略
+    "resolveJsonModule": false, // 是否允许导入 JSON 文件
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["@types/webgl2"]
+    "types": ["@types/webgl2"] // 只包含全局类型，其他通过 import 使用的库不需要写在这里
   }
 }

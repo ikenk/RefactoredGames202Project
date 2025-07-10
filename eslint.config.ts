@@ -1,5 +1,3 @@
-// import
-
 export default {
   root: true, // 以当前目录为根
   env: {

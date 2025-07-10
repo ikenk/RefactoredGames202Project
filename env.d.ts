@@ -13,7 +13,7 @@ interface ImportMeta {
   readonly env: ImportMetaEnv
 }
 
-export type ViteConfigEnv = 'development' | 'staging' | 'production'
+export type ViteConfigEnv = 'staging' | 'production'
 
 // 确保 global 声明生效
 export {}
