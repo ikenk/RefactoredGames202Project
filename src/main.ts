@@ -1,5 +1,5 @@
 import '@/styles/main.css'
-import { Engine } from './engine'
+import { Engine } from '@/engine'
 
 document.querySelector('head title').textContent = `Refactored Games202 Project ${__BUILD_TIME__}`
 
@@ -12,5 +12,9 @@ if (!canvas) {
 // 设置 canvas 的宽和高
 canvas.width = window.screen.width
 canvas.height = window.screen.height
+// canvas.width = window.innerWidth
+// canvas.height = window.innerHeight
 
 const engine = new Engine(canvas)
+
+engine.mainLoop()
