@@ -1,15 +1,12 @@
-import type { Vector3, Transformation, TransformationParams } from '@/types/transformation'
+import type { Transformation, TransformationParams } from '@/types/transformation'
+import type { Vec3 } from '@/types/math'
 
 export class TRSTransform implements Transformation {
-  public translate: Vector3
-  public scale: Vector3
-  public rotate: Vector3
+  public translate: Vec3
+  public scale: Vec3
+  public rotate: Vec3
 
-  constructor(
-    translate: Vector3 = [0, 0, 0],
-    scale: Vector3 = [1, 1, 1],
-    rotate: Vector3 = [0, 0, 0]
-  ) {
+  constructor(translate: Vec3 = [0, 0, 0], scale: Vec3 = [1, 1, 1], rotate: Vec3 = [0, 0, 0]) {
     this.translate = translate
     this.scale = scale
     this.rotate = rotate
@@ -90,17 +87,13 @@ export class Mesh {
     this.count = indices.length
   }
   initTransformation(transform: TransformationParams) {
-    const modelTranslation: Vector3 = [
+    const modelTranslation: Vec3 = [
       transform.modelTransX,
       transform.modelTransY,
       transform.modelTransZ
     ]
-    const modelScale: Vector3 = [
-      transform.modelScaleX,
-      transform.modelScaleY,
-      transform.modelScaleZ
-    ]
-    const modelRotate: Vector3 = [
+    const modelScale: Vec3 = [transform.modelScaleX, transform.modelScaleY, transform.modelScaleZ]
+    const modelRotate: Vec3 = [
       transform.modelRotateX,
       transform.modelRotateY,
       transform.modelRotateZ

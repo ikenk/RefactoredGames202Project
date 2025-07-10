@@ -3,13 +3,14 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 import { Mesh } from '@/objects/Mesh'
 import { Texture } from '@/textures/Texture'
+import { WebGLRenderer } from '@/renderers/WebGLRenderer'
 import { MeshRender } from '@/renderers/MeshRender'
 import { setTransform } from '@/utils/transformation'
 import { buildSSRMaterial } from '@/materials/SSRMaterial'
 import { buildShadowMaterial } from '@/materials/ShadowMaterial'
 import { buildGbufferMaterial } from '@/materials/GBufferMaterial'
 
-export function loadGLTF(renderer, path, name, materialName) {
+export function loadGLTF(renderer /*: WebGLRenderer*/, path, name, materialName) {
   const manager = new LoadingManager()
   manager.onProgress = function (item, loaded, total) {
     // console.log(item, loaded, total)
@@ -23,7 +24,7 @@ export function loadGLTF(renderer, path, name, materialName) {
       console.log('model ' + Math.round(percentComplete, 2) + '% downloaded')
     }
   }
-  function onError() {
+  function onError(url) {
     console.error('❌ Failed to load:', url)
   }
 

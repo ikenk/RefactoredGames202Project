@@ -8,7 +8,9 @@ import { FBO } from '@/textures/FBO'
 import { loadGLTF } from '@/loaders/loadGLTF'
 import { DirectionalLight } from '@/lights/DirectionalLight'
 
-import type { CameraType, SceneType, LightType, LightParams } from '@/types/engine'
+import type { LightParams } from './types/light'
+import type { CameraType, SceneType, LightType } from '@/types/engine'
+import { Vec3 } from './types/math'
 
 export class Engine {
   // public
@@ -165,7 +167,7 @@ export class Engine {
 
   // 添加灯光
   addLight(lightType: LightType) {
-    let lightUp = [1, 0, 0]
+    let lightUp: Vec3 = [1, 0, 0]
     let lightParams = this.getLightParams(lightType)
     // console.log(lightParams)
 
@@ -178,6 +180,7 @@ export class Engine {
       this.gl_draw_buffers
     )
     this.renderer.addLight(directionLight)
+    console.log(this.renderer.lights)
   }
   // 返回灯光参数
   getLightParams(lightType: LightType): LightParams {
