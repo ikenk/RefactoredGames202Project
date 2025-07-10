@@ -1,14 +1,24 @@
-class EmissiveMaterial extends Material {
+import { Material } from '@/materials/Material'
+import { LightCubeVertexShader, LightCubeFragmentShader } from '@/shaders/InternalShader'
 
-    constructor(lightRadiance) {
-        super({
-            'uLightRadiance': { type: '3fv', value: lightRadiance }
-        }, [], LightCubeVertexShader, LightCubeFragmentShader);
+export class EmissiveMaterial extends Material {
+  // public
+  color
 
-        this.color = lightRadiance;
-    }
+  constructor(lightRadiance) {
+    super(
+      {
+        uLightRadiance: { type: '3fv', value: lightRadiance }
+      },
+      [],
+      LightCubeVertexShader,
+      LightCubeFragmentShader
+    )
 
-    GetIntensity() {
-        return this.color;
-    }
+    this.color = lightRadiance
+  }
+
+  GetIntensity() {
+    return this.color
+  }
 }

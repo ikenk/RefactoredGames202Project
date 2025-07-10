@@ -1,35 +1,44 @@
-class Material {
-    #flatten_uniforms;
-    #flatten_attribs;
-    #vsSrc;
-    #fsSrc;
-    // Uniforms is a map, attribs is a Array
-    constructor(uniforms, attribs, vsSrc, fsSrc, frameBuffer) {
-        this.uniforms = uniforms;
-        this.attribs = attribs;
-        this.#vsSrc = vsSrc;
-        this.#fsSrc = fsSrc;
+import { Shader } from '@/shaders/Shader'
 
-        this.#flatten_uniforms = ['uViewMatrix','uModelMatrix', 'uProjectionMatrix', 'uCameraPos'];
-        for (let k in uniforms) {
-            this.#flatten_uniforms.push(k);
-        }
-        this.#flatten_attribs = attribs;
-        this.frameBuffer = frameBuffer;
-        this.notShadow = false;
-    }
+export class Material {
+  // public
+  uniforms
+  attribs
+  frameBuffer
+  notShadow
+  // private
+  #flatten_uniforms
+  #flatten_attribs
+  #vsSrc
+  #fsSrc
+  // Uniforms is a map, attribs is a Array
+  constructor(uniforms, attribs, vsSrc, fsSrc, frameBuffer) {
+    this.uniforms = uniforms
+    this.attribs = attribs
+    this.#vsSrc = vsSrc
+    this.#fsSrc = fsSrc
 
-    setMeshAttribs(extraAttribs) {
-        for (let i = 0; i < extraAttribs.length; i++) {
-            this.#flatten_attribs.push(extraAttribs[i]);
-        }
+    this.#flatten_uniforms = ['uViewMatrix', 'uModelMatrix', 'uProjectionMatrix', 'uCameraPos']
+    for (let k in uniforms) {
+      this.#flatten_uniforms.push(k)
     }
+    this.#flatten_attribs = attribs
 
-    compile(gl) {
-        return new Shader(gl, this.#vsSrc, this.#fsSrc,
-            {
-                uniforms: this.#flatten_uniforms,
-                attribs: this.#flatten_attribs
-            });
+    this.frameBuffer = frameBuffer
+    this.notShadow = false
+  }
+
+  setMeshAttribs(extraAttribs) {
+    // console.log(extraAttribs)
+    for (let i = 0; i < extraAttribs.length; i++) {
+      this.#flatten_attribs.push(extraAttribs[i])
     }
+  }
+
+  compile(gl) {
+    return new Shader(gl, this.#vsSrc, this.#fsSrc, {
+      uniforms: this.#flatten_uniforms,
+      attribs: this.#flatten_attribs
+    })
+  }
 }

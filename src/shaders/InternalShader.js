@@ -1,4 +1,4 @@
-const LightCubeVertexShader = `
+export const LightCubeVertexShader = `
 attribute vec3 aVertexPosition;
 
 uniform mat4 uModelMatrix;
@@ -11,9 +11,9 @@ void main(void) {
   gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition, 1.0);
 
 }
-`;
+`
 
-const LightCubeFragmentShader = `
+export const LightCubeFragmentShader = `
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -25,4 +25,4 @@ void main(void) {
 
   gl_FragColor = vec4(uLightRadiance, 1.0);
 }
-`;
+`

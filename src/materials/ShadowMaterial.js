@@ -1,16 +1,25 @@
-class ShadowMaterial extends Material {
-    constructor(light, vertexShader, fragmentShader) {
-        let lightVP = light.CalcLightVP();
+import { Material } from '@/materials/Material'
+import { getShaderString } from '@/loaders/loadShader'
 
-        super({
-            'uLightVP': { type: 'matrix4fv', value: lightVP }
-        }, [], vertexShader, fragmentShader, light.fbo);
-    }
+class ShadowMaterial extends Material {
+  constructor(light, vertexShader, fragmentShader) {
+    let lightVP = light.CalcLightVP()
+
+    super(
+      {
+        uLightVP: { type: 'matrix4fv', value: lightVP }
+      },
+      [],
+      vertexShader,
+      fragmentShader,
+      light.fbo
+    )
+  }
 }
 
-async function buildShadowMaterial(light, vertexPath, fragmentPath) {
-    let vertexShader = await getShaderString(vertexPath);
-    let fragmentShader = await getShaderString(fragmentPath);
+export async function buildShadowMaterial(light, vertexPath, fragmentPath) {
+  let vertexShader = await getShaderString(vertexPath)
+  let fragmentShader = await getShaderString(fragmentPath)
 
-    return new ShadowMaterial(light, vertexShader, fragmentShader);
+  return new ShadowMaterial(light, vertexShader, fragmentShader)
 }
