@@ -1,19 +1,12 @@
-import { fileURLToPath } from 'url'
-import { defineConfig, loadEnv } from 'vite'
+import { fileURLToPath, URL } from 'url'
+import { defineConfig, loadEnv, UserConfig } from 'vite'
 import { ViteConfigEnv } from './env'
 
 // console.log(new URL('./src', import.meta.url))
 // console.log(import.meta.url)
 
 // 构建配置
-const buildConfigMap: Record<ViteConfigEnv, object> = {
-  development: {
-    build: {
-      sourcemap: 'inline',
-      minify: false,
-      reportCompressedSize: false
-    }
-  },
+const buildConfigMap: Record<ViteConfigEnv, UserConfig> = {
   staging: {
     build: {
       sourcemap: true,
@@ -47,15 +40,17 @@ const buildConfigMap: Record<ViteConfigEnv, object> = {
 }
 
 export default defineConfig(({ command, mode }) => {
-  // console.log(`Command: ${command}, Mode: ${mode}`)
+  console.log(`Command: ${command}, Mode: ${mode}`)
   // console.log(fileURLToPath(new URL('./', import.meta.url)))
   console.log(loadEnv(mode, fileURLToPath(new URL('./', import.meta.url))))
 
   const env = loadEnv(mode, fileURLToPath(new URL('./', import.meta.url)))
 
   // 基础配置
-  const baseConfig = {
+  const baseConfig: UserConfig = {
+    // 项目根目录位置
     root: fileURLToPath(new URL('./', import.meta.url)),
+    // 应用的基础公共路径，部署在 https://domain.com/
     base: '/',
     plugins: [],
     resolve: {
@@ -80,13 +75,16 @@ export default defineConfig(({ command, mode }) => {
     // 定义全局常量
     define: {
       __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
-      __BUILD_TIME__: JSON.stringify(new Date().toISOString())
+      __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+      __APP_ROOT_PATH__: JSON.stringify(fileURLToPath(new URL('./', import.meta.url)))
     },
     // 优化依赖
     optimizeDeps: {
       include: [],
       exclude: []
-    }
+    },
+    // 可以直接导入assets文件，import modelUrl from './assets/model.obj' 或者 import modelData from './assets/model.obj?raw' 或者 import modelUrl from './assets/model.obj?url'
+    assetsInclude: ['**/*.obj', '**/*.mtl', '**/*.fbx', '**/*.gltf']
   }
 
   // 开发服务器配置
@@ -98,6 +96,13 @@ export default defineConfig(({ command, mode }) => {
         host: true,
         open: false,
         cors: true
+      },
+      // 添加开发环境的其他配置
+      css: {
+        devSourcemap: true // 开发环境的 CSS sourcemap
+      },
+      esbuild: {
+        drop: [] // 开发环境保留 console.log
       }
     }
   }
