@@ -1,5 +1,6 @@
 import type { Transformation, TransformationParams } from '@/types/transformation'
 import type { Vec3 } from '@/types/math'
+import type { AttributeData } from '@/types/mesh'
 
 export class TRSTransform implements Transformation {
   public translate: Vec3
@@ -11,11 +12,6 @@ export class TRSTransform implements Transformation {
     this.scale = scale
     this.rotate = rotate
   }
-}
-
-interface AttributeData {
-  name: string
-  array: Float32Array
 }
 
 export class Mesh {
@@ -41,6 +37,7 @@ export class Mesh {
   public hasTexcoords: boolean = false
   public texcoords?: Float32Array
   public texcoordsName?: string
+
   constructor(
     verticesAttrib: AttributeData,
     normalsAttrib: AttributeData,
@@ -103,7 +100,7 @@ export class Mesh {
     this.transform = meshTrans
   }
 
-  static cube(transform: TransformationParams) {
+  static cube(transform: TransformationParams): Mesh {
     const positions: number[] = [
       // Front face
       -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0,

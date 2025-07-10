@@ -6,6 +6,6 @@ export type LightType = 'CubeLight' | 'CaveLight'
 
 declare module 'three' {
   interface PerspectiveCamera {
-    fbo?: FBO
+    fbo?: WebGLFramebuffer
   }
 }

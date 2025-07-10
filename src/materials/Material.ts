@@ -7,8 +7,8 @@ interface Uniforms {
 
 export class Material {
   // public
-  private uniforms: Uniforms
-  private attribs: string[]
+  public uniforms: Uniforms
+  public attribs: string[]
   public frameBuffer: FBO | null
   public notShadow: boolean
   // private

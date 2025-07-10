@@ -1,18 +1,25 @@
 import { mat4 } from 'gl-matrix'
 
+import { Mesh } from '@/objects/Mesh'
+import { Material } from '@/materials/Material'
+import { Shader } from '@/shaders/Shader'
+import { PerspectiveCamera } from 'three'
+import { FBO } from '@/textures/FBO'
+import { UpdatedLightParamters } from '@/types/light'
+
 export class MeshRender {
   // public
-  gl
-  mesh
-  material
-  shader
+  public gl: WebGLRenderingContext
+  public mesh: Mesh
+  public material: Material
+  public shader: Shader
   // private
-  #vertexBuffer
-  #normalBuffer
-  #texcoordBuffer
-  #indicesBuffer
+  #vertexBuffer: WebGLBuffer
+  #normalBuffer: WebGLBuffer
+  #texcoordBuffer: WebGLBuffer
+  #indicesBuffer: WebGLBuffer
 
-  constructor(gl, mesh, material) {
+  constructor(gl: WebGLRenderingContext, mesh: Mesh, material: Material) {
     this.gl = gl
     this.mesh = mesh
     this.material = material
@@ -22,28 +29,36 @@ export class MeshRender {
     this.#texcoordBuffer = this.gl.createBuffer()
     this.#indicesBuffer = this.gl.createBuffer()
 
+    // 处理 Mesh 中的数据
     let extraAttribs = []
     if (mesh.hasVertices) {
+      // 提取 Mesh 中的 attri
       extraAttribs.push(mesh.verticesName)
+      // 将节点坐标写入显存
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.#vertexBuffer)
       this.gl.bufferData(this.gl.ARRAY_BUFFER, mesh.vertices, this.gl.STATIC_DRAW)
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null)
     }
 
     if (mesh.hasNormals) {
+      // 提取 Mesh 中的 attri
       extraAttribs.push(mesh.normalsName)
+      // 将节点法线写入显存
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.#normalBuffer)
       this.gl.bufferData(this.gl.ARRAY_BUFFER, mesh.normals, this.gl.STATIC_DRAW)
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null)
     }
 
     if (mesh.hasTexcoords) {
+      // 提取 Mesh 中的 attri
       extraAttribs.push(mesh.texcoordsName)
+      // 将节点纹理坐标写入显存
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.#texcoordBuffer)
       this.gl.bufferData(this.gl.ARRAY_BUFFER, mesh.texcoords, this.gl.STATIC_DRAW)
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null)
     }
 
+    // 将节点索引写入显存
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.#indicesBuffer)
     this.gl.bufferData(
       this.gl.ELEMENT_ARRAY_BUFFER,
@@ -54,10 +69,15 @@ export class MeshRender {
 
     // console.log(extraAttribs)
 
+    // 将 vertex 中包含的所有 atrri 写入 material
     this.material.setMeshAttribs(extraAttribs)
+
+    // 创建与 material 对应的 shader
     this.shader = this.material.compile(this.gl)
   }
 
+  // 启动 vertex 的 vertices、normals、texture coordinates 属性
+  // 绑定索引数据 indices
   bindGeometryInfo() {
     const gl = this.gl
 
@@ -118,7 +138,8 @@ export class MeshRender {
     gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.#indicesBuffer)
   }
 
-  bindCameraParameters(camera) {
+  // 修改（写入） shader 中的 MVP 矩阵和 uCameraPos 相机位置等 uniform 变量
+  bindCameraParameters(camera: PerspectiveCamera) {
     const gl = this.gl
 
     let modelMatrix = mat4.create()
@@ -150,6 +171,7 @@ export class MeshRender {
     ])
   }
 
+  // 利用 material 修改（写入）shader 中的 uniform 数据
   bindMaterialParameters() {
     const gl = this.gl
 
@@ -183,7 +205,12 @@ export class MeshRender {
     }
   }
 
-  draw(camera, gl_draw_buffers, fbo, updatedParamters) {
+  draw(
+    camera: PerspectiveCamera,
+    gl_draw_buffers: WEBGL_draw_buffers,
+    fbo /*null*/,
+    updatedLightParamters: UpdatedLightParamters
+  ) {
     const gl = this.gl
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo)
@@ -200,7 +227,7 @@ export class MeshRender {
     this.bindCameraParameters(camera)
 
     // Bind material parameters
-    this.updateMaterialParameters(updatedParamters)
+    this.updateMaterialParameters(updatedLightParamters)
     this.bindMaterialParameters()
 
     // Draw

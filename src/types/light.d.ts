@@ -15,13 +15,18 @@ export interface LightParams {
   lightDir: LightDir
 }
 
+export interface UpdatedLightParamters {
+  uLightVP: mat4
+  uLightDir: Vec3
+}
+
 export interface Light {
   mesh: Mesh
   mat: EmissiveMaterial
   lightPos: LightParams['lightPos']
   lightDir: LightParams['lightDir']
   lightUp: LightUp
-  fbo: FBO
+  fbo: WebGLFramebuffer
 
   CalcShadingDirection(): Vec3
   CalcLightVP(): mat4

@@ -19,7 +19,7 @@ export class DirectionalLight implements Light {
   public lightPos: LightParams['lightPos']
   public lightDir: LightParams['lightDir']
   public lightUp: LightUp
-  public fbo: FBO
+  public fbo: WebGLFramebuffer
 
   /**
    * 构造一个定向光源实例
@@ -49,7 +49,7 @@ export class DirectionalLight implements Light {
     this.lightDir = lightDir
     this.lightUp = lightUp
 
-    this.fbo = new FBO(gl, gl_draw_buffers)
+    this.fbo = new FBO(gl, gl_draw_buffers).getFrameBuffer()
     // console.log(this.fbo)
 
     if (!this.fbo) {

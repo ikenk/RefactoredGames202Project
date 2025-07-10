@@ -2,6 +2,7 @@ import { MeshRender } from '@/renderers/MeshRender'
 import { PerspectiveCamera } from 'three'
 
 import type { LightObj } from '@/types/WebGLRenderer'
+import type { UpdatedLightParamters } from '@/types/light'
 
 export class WebGLRenderer {
   public gl: WebGLRenderingContext
@@ -51,17 +52,18 @@ export class WebGLRenderer {
     gl.depthFunc(gl.LEQUAL)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    // Update parameters
+    // Update light parameters
+    // 每一帧光源的位置、方向可能会变化，需要重新计算
     let lightVP = light.entity.CalcLightVP()
     let lightDir = light.entity.CalcShadingDirection()
-    let updatedParamters = {
+    let updatedLightParamters: UpdatedLightParamters = {
       uLightVP: lightVP,
       uLightDir: lightDir
     }
 
     // Draw light
     light.meshRender.mesh.transform.translate = light.entity.lightPos
-    light.meshRender.draw(this.camera, this.gl_draw_buffers, null, updatedParamters)
+    light.meshRender.draw(this.camera, this.gl_draw_buffers, null, updatedLightParamters)
     // console.log(light.meshRender)
 
     // Shadow pass
@@ -73,7 +75,7 @@ export class WebGLRenderer {
         this.camera,
         this.gl_draw_buffers,
         light.entity.fbo,
-        updatedParamters
+        updatedLightParamters
       )
       // this.shadowMeshes[i].draw(this.camera);
     }
@@ -86,14 +88,14 @@ export class WebGLRenderer {
         this.camera,
         this.gl_draw_buffers,
         this.camera.fbo,
-        updatedParamters
+        updatedLightParamters
       )
       // this.bufferMeshes[i].draw(this.camera);
     }
 
     // Camera pass
     for (let i = 0; i < this.meshRenders.length; i++) {
-      this.meshRenders[i].draw(this.camera, this.gl_draw_buffers, null, updatedParamters)
+      this.meshRenders[i].draw(this.camera, this.gl_draw_buffers, null, updatedLightParamters)
     }
   }
 }
