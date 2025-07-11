@@ -1,8 +1,18 @@
 import { Material } from '@/materials/Material'
 import { getShaderString } from '@/loaders/loadShader'
+import { PerspectiveCamera } from 'three'
+import { Light } from '@/types/light'
+import { Texture } from '@/textures/Texture'
 
 class GBufferMaterial extends Material {
-  constructor(diffuseMap, normalMap, light, camera, vertexShader, fragmentShader) {
+  constructor(
+    diffuseMap: Texture,
+    normalMap: Texture,
+    light: Light,
+    camera: PerspectiveCamera,
+    vertexShader: string,
+    fragmentShader: string
+  ) {
     let lightVP = light.CalcLightVP()
 
     super(
@@ -22,13 +32,13 @@ class GBufferMaterial extends Material {
 }
 
 export async function buildGbufferMaterial(
-  diffuseMap,
-  normalMap,
-  light,
-  camera,
-  vertexPath,
-  fragmentPath
-) {
+  diffuseMap: Texture,
+  normalMap: Texture,
+  light: Light,
+  camera: PerspectiveCamera,
+  vertexPath: string,
+  fragmentPath: string
+): Promise<GBufferMaterial> {
   let vertexShader = await getShaderString(vertexPath)
   let fragmentShader = await getShaderString(fragmentPath)
 

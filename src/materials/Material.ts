@@ -9,7 +9,7 @@ export class Material {
   // public
   public uniforms: Uniforms
   public attribs: string[]
-  public frameBuffer: FBO | null
+  public frameBuffer: WebGLFramebuffer | null
   public notShadow: boolean
   // private
   #flatten_uniforms: string[]
@@ -22,7 +22,7 @@ export class Material {
     attribs: string[],
     vsSrc: string,
     fsSrc: string,
-    frameBuffer: FBO | null
+    frameBuffer: WebGLFramebuffer | null
   ) {
     this.uniforms = uniforms
     this.attribs = attribs

@@ -4,8 +4,8 @@ import { Mesh } from '@/objects/Mesh'
 import { Material } from '@/materials/Material'
 import { Shader } from '@/shaders/Shader'
 import { PerspectiveCamera } from 'three'
-import { FBO } from '@/textures/FBO'
-import { UpdatedLightParamters } from '@/types/light'
+
+import type { UpdatedParamters } from '@/types/MeshRender'
 
 export class MeshRender {
   // public
@@ -194,7 +194,7 @@ export class MeshRender {
     }
   }
 
-  updateMaterialParameters(parameters) {
+  updateMaterialParameters(parameters: UpdatedParamters) {
     if (parameters == null) {
       return
     }
@@ -208,8 +208,8 @@ export class MeshRender {
   draw(
     camera: PerspectiveCamera,
     gl_draw_buffers: WEBGL_draw_buffers,
-    fbo /*null*/,
-    updatedLightParamters: UpdatedLightParamters
+    fbo: WebGLFramebuffer | null,
+    updatedParamters: UpdatedParamters
   ) {
     const gl = this.gl
 
@@ -227,7 +227,7 @@ export class MeshRender {
     this.bindCameraParameters(camera)
 
     // Bind material parameters
-    this.updateMaterialParameters(updatedLightParamters)
+    this.updateMaterialParameters(updatedParamters)
     this.bindMaterialParameters()
 
     // Draw

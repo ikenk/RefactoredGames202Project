@@ -181,7 +181,7 @@ export class Engine {
       this.gl_draw_buffers
     )
     this.renderer.addLight(directionLight)
-    console.log(this.renderer.lights)
+    // console.log(this.renderer.lights)
   }
   // 返回灯光参数
   getLightParams(lightType: LightType): LightParams {

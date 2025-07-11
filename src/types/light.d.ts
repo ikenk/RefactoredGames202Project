@@ -1,5 +1,6 @@
 import type { mat4 } from 'gl-matrix'
 import type { Vec3 } from './math'
+import type { UpdatedParamters } from '@/types/MeshRender'
 
 type LightUp = Vec3
 
@@ -15,7 +16,7 @@ export interface LightParams {
   lightDir: LightDir
 }
 
-export interface UpdatedLightParamters {
+export interface UpdatedLightParamters extends UpdatedParamters {
   uLightVP: mat4
   uLightDir: Vec3
 }
