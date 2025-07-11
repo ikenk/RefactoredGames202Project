@@ -1,12 +1,10 @@
 import { TRSTransform } from '@/objects/Mesh'
-
-// 定义3D向量类型
-export type Vector3 = [number, number, number]
+import { Vec3 } from './math'
 
 export interface Transformation {
-  translate: Vector3
-  scale: Vector3
-  rotate: Vector3
+  translate: Vec3
+  scale: Vec3
+  rotate: Vec3
 }
 
 export interface TransformationParams {

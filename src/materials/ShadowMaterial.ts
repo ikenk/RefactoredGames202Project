@@ -1,8 +1,9 @@
 import { Material } from '@/materials/Material'
 import { getShaderString } from '@/loaders/loadShader'
+import { Light } from '@/types/light'
 
 class ShadowMaterial extends Material {
-  constructor(light, vertexShader, fragmentShader) {
+  constructor(light: Light, vertexShader: string, fragmentShader: string) {
     let lightVP = light.CalcLightVP()
 
     super(
@@ -17,7 +18,11 @@ class ShadowMaterial extends Material {
   }
 }
 
-export async function buildShadowMaterial(light, vertexPath, fragmentPath) {
+export async function buildShadowMaterial(
+  light: Light,
+  vertexPath: string,
+  fragmentPath: string
+): Promise<ShadowMaterial> {
   let vertexShader = await getShaderString(vertexPath)
   let fragmentShader = await getShaderString(fragmentPath)
 

@@ -1,5 +1,8 @@
 import { mat4 } from 'gl-matrix'
 
+import type { Vec3 } from '@/types/math'
+import type { LightUp, LightParams } from '@/types/light'
+import type { Light } from '@/types/light'
 import { FBO } from '@/textures/FBO'
 import { Mesh } from '@/objects/Mesh'
 import { setTransform } from '@/utils/transformation'
@@ -9,24 +12,31 @@ import { EmissiveMaterial } from '@/lights/Light'
  * 定向光源类，用于3D渲染中的光照计算和阴影映射
  * @class DirectionalLight
  */
-export class DirectionalLight {
+export class DirectionalLight implements Light {
   // public
-  mesh
-  mat
-  lightPos
-  lightDir
-  lightUp
-  fbo
+  public mesh: Mesh
+  public mat: EmissiveMaterial
+  public lightPos: LightParams['lightPos']
+  public lightDir: LightParams['lightDir']
+  public lightUp: LightUp
+  public fbo: WebGLFramebuffer
 
   /**
    * 构造一个定向光源实例
    * @param {Array<number>} lightRadiance - 光源辐射度
    * @param {Array<number>} lightPos - 光源位置，格式为[x, y, z]
-   * @param {Object} lightDir - 光源方向向量，包含x, y, z属性
-   * @param {Array<number>} lightUp - 光源上方向向量，用于构建视图矩阵，格式为[x, y, z]
+   * @param {LightParams['lightDir']} lightDir - 光源方向向量，包含x, y, z属性
+   * @param {LightUp} lightUp - 光源上方向向量，用于构建视图矩阵，格式为[x, y, z]
    * @param {WebGLRenderingContext} gl - WebGL渲染上下文
    */
-  constructor(lightRadiance, lightPos, lightDir, lightUp, gl, gl_draw_buffers) {
+  constructor(
+    lightRadiance: LightParams['lightRadiance'],
+    lightPos: LightParams['lightPos'],
+    lightDir: LightParams['lightDir'],
+    lightUp: LightUp,
+    gl: WebGLRenderingContext,
+    gl_draw_buffers: WEBGL_draw_buffers
+  ) {
     /**
      * 光源的可视化网格，创建一个0.1x0.1x0.1的小立方体用于显示光源位置
      * @type {Mesh}
@@ -39,7 +49,7 @@ export class DirectionalLight {
     this.lightDir = lightDir
     this.lightUp = lightUp
 
-    this.fbo = new FBO(gl, gl_draw_buffers)
+    this.fbo = new FBO(gl, gl_draw_buffers).getFrameBuffer()
     // console.log(this.fbo)
 
     if (!this.fbo) {
@@ -53,8 +63,8 @@ export class DirectionalLight {
    * 返回光源方向的反向，用于光照计算中确定光线的入射方向(从shading point到光源)
    * @returns {Array<number>} 着色方向向量，格式为[x, y, z]
    */
-  CalcShadingDirection() {
-    let lightDir = [-this.lightDir['x'], -this.lightDir['y'], -this.lightDir['z']]
+  CalcShadingDirection(): Vec3 {
+    let lightDir: Vec3 = [-this.lightDir['x'], -this.lightDir['y'], -this.lightDir['z']]
     return lightDir
   }
 
@@ -63,13 +73,13 @@ export class DirectionalLight {
    * 用于阴影映射，从光源的视角渲染场景
    * @returns {mat4} 光源的视图投影矩阵
    */
-  CalcLightVP() {
+  CalcLightVP(): mat4 {
     let lightVP = mat4.create()
     let viewMatrix = mat4.create()
     let projectionMatrix = mat4.create()
 
     // View transform
-    let focalPoint = [
+    let focalPoint: Vec3 = [
       this.lightDir['x'] + this.lightPos[0],
       this.lightDir['y'] + this.lightPos[1],
       this.lightDir['z'] + this.lightPos[2]

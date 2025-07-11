@@ -1,4 +1,4 @@
-export const LightCubeVertexShader = `
+export const LightCubeVertexShader: string = `
 attribute vec3 aVertexPosition;
 
 uniform mat4 uModelMatrix;
@@ -13,7 +13,7 @@ void main(void) {
 }
 `
 
-export const LightCubeFragmentShader = `
+export const LightCubeFragmentShader: string = `
 #ifdef GL_ES
 precision mediump float;
 #endif
