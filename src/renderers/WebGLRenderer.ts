@@ -27,7 +27,7 @@ export class WebGLRenderer {
   addLight(light: LightObj['entity']) {
     this.lights.push({
       entity: light,
-      meshRender: new MeshRender(this.gl, light.mesh, light.mat)
+      meshRender: new MeshRender(this.gl, light.mesh, light.material)
     })
   }
   addMeshRender(meshRender: MeshRender) {
