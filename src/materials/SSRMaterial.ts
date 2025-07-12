@@ -13,7 +13,7 @@ class SSRMaterial extends Material {
     vertexShader: string,
     fragmentShader: string
   ) {
-    let lightIntensity = light.mat.GetIntensity()
+    let lightIntensity = light.material.GetIntensity()
     let lightVP = light.CalcLightVP()
     let lightDir = light.CalcShadingDirection()
 

@@ -23,7 +23,7 @@ export interface UpdatedLightParamters extends UpdatedParamters {
 
 export interface Light {
   mesh: Mesh
-  mat: EmissiveMaterial
+  material: EmissiveMaterial
   lightPos: LightParams['lightPos']
   lightDir: LightParams['lightDir']
   lightUp: LightUp

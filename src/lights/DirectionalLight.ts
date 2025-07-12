@@ -15,7 +15,7 @@ import { EmissiveMaterial } from '@/lights/Light'
 export class DirectionalLight implements Light {
   // public
   public mesh: Mesh
-  public mat: EmissiveMaterial
+  public material: EmissiveMaterial
   public lightPos: LightParams['lightPos']
   public lightDir: LightParams['lightDir']
   public lightUp: LightUp
@@ -43,7 +43,7 @@ export class DirectionalLight implements Light {
      */
     this.mesh = Mesh.cube(setTransform(0, 0, 0, 0.1, 0.1, 0.1))
 
-    this.mat = new EmissiveMaterial(lightRadiance)
+    this.material = new EmissiveMaterial(lightRadiance)
 
     this.lightPos = lightPos
     this.lightDir = lightDir
