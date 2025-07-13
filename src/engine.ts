@@ -12,6 +12,8 @@ import type { LightParams } from './types/light'
 import type { CameraType, SceneType, LightType } from '@/types/engine'
 import { Vec3 } from './types/math'
 
+import { PerformanceMonitor } from './Monitors/PerformanceMonitor'
+
 export class Engine {
   // public
   // 上下文属性
@@ -25,6 +27,8 @@ export class Engine {
   private cameraControls: OrbitControls
   // 渲染器
   public renderer: WebGLRenderer
+
+  private perfMonitor: PerformanceMonitor
 
   constructor(canvas: HTMLCanvasElement) {
     // 上下文属性
@@ -66,6 +70,8 @@ export class Engine {
     this.addLight('CaveLight')
     // 加载调参面板
     this.initGUI()
+    // 初始化性能检测器
+    this.initPerformanceMonitor()
   }
 
   // 初始化上下文
@@ -230,11 +236,17 @@ export class Engine {
     lightPanel.open()
   }
 
+  // 初始化性能检测器
+  initPerformanceMonitor() {
+    const perfMonitor = new PerformanceMonitor()
+    this.perfMonitor = perfMonitor
+  }
+
   // 启动渲染
   mainLoop() {
     this.cameraControls.update()
-
     this.renderer.render()
+    this.perfMonitor.update()
     requestAnimationFrame(() => this.mainLoop())
     // console.log('mainLoop is running')
   }

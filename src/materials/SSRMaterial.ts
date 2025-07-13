@@ -4,7 +4,7 @@ import { Light } from '@/types/light'
 import { PerspectiveCamera } from 'three'
 import { Texture } from '@/textures/Texture'
 
-class SSRMaterial extends Material {
+export class SSRMaterial extends Material {
   constructor(
     diffuseMap: Texture,
     specularMap: Texture,
@@ -14,8 +14,8 @@ class SSRMaterial extends Material {
     fragmentShader: string
   ) {
     let lightIntensity = light.material.GetIntensity()
-    let lightVP = light.CalcLightVP()
-    let lightDir = light.CalcShadingDirection()
+    let lightVP = light.CalcDirectionalLightVP()
+    let lightDir = light.CalcDirectionalShadingDirection()
 
     super(
       {

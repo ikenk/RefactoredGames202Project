@@ -145,6 +145,7 @@ export class FBO {
   }
 }
 
+// 原 FBO 类
 // export class FBO {
 //   gl
 //   gl_draw_buffers

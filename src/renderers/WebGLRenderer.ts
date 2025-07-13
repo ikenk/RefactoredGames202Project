@@ -54,8 +54,8 @@ export class WebGLRenderer {
 
     // Update light parameters
     // 每一帧光源的位置、方向可能会变化，需要重新计算
-    let lightVP = light.entity.CalcLightVP()
-    let lightDir = light.entity.CalcShadingDirection()
+    let lightVP = light.entity.CalcDirectionalLightVP()
+    let lightDir = light.entity.CalcDirectionalShadingDirection()
     let updatedLightParamters: UpdatedLightParamters = {
       uLightVP: lightVP,
       uLightDir: lightDir

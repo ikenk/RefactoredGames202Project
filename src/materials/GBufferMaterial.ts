@@ -4,7 +4,7 @@ import { PerspectiveCamera } from 'three'
 import { Light } from '@/types/light'
 import { Texture } from '@/textures/Texture'
 
-class GBufferMaterial extends Material {
+export class GBufferMaterial extends Material {
   constructor(
     diffuseMap: Texture,
     normalMap: Texture,
@@ -13,7 +13,7 @@ class GBufferMaterial extends Material {
     vertexShader: string,
     fragmentShader: string
   ) {
-    let lightVP = light.CalcLightVP()
+    let lightVP = light.CalcDirectionalLightVP()
 
     super(
       {
