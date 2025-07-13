@@ -1,6 +1,10 @@
+import { Vec3 } from '@/types/math'
+
 export class Texture {
+  public texture: WebGLTexture
+
   constructor() {}
-  CreateImageTexture(gl, image) {
+  CreateImageTexture(gl: WebGLRenderingContext, image: ImageBitmap) {
     this.texture = gl.createTexture()
     gl.bindTexture(gl.TEXTURE_2D, this.texture)
 
@@ -9,14 +13,15 @@ export class Texture {
     // Until then put a single pixel in the texture so we can
     // use it immediately. When the image has finished downloading
     // we'll update the texture with the contents of the image.
-    const level = 0
-    const internalFormat = gl.RGBA
-    const width = 1
-    const height = 1
-    const border = 0
-    const srcFormat = gl.RGBA
-    const srcType = gl.UNSIGNED_BYTE
-    const pixel = new Uint8Array([0, 0, 255, 255]) // opaque blue
+    const level: GLint = 0
+    const internalFormat: GLint = gl.RGBA
+    const width: GLsizei = 1
+    const height: GLsizei = 1
+    const border: GLint = 0
+    const srcFormat: GLenum = gl.RGBA
+    const srcType: GLenum = gl.UNSIGNED_BYTE
+    const pixel: Uint8Array = new Uint8Array([0, 0, 255, 255]) // opaque blue
+
     gl.texImage2D(
       gl.TEXTURE_2D,
       level,
@@ -38,7 +43,7 @@ export class Texture {
     this.CreateMipmap(gl, image.width, image.height)
   }
 
-  CreateConstantTexture(gl, buffer, gamma) {
+  CreateConstantTexture(gl: WebGLRenderingContext, buffer: Vec3, gamma: boolean = false) {
     this.texture = gl.createTexture()
     gl.bindTexture(gl.TEXTURE_2D, this.texture)
 
@@ -47,14 +52,14 @@ export class Texture {
     // Until then put a single pixel in the texture so we can
     // use it immediately. When the image has finished downloading
     // we'll update the texture with the contents of the image.
-    let level = 0
-    let internalFormat = gl.RGB
-    let width = 1
-    let height = 1
-    let border = 0
-    let srcFormat = gl.RGB
-    let srcType = gl.UNSIGNED_BYTE
-    let pixel
+    const level: GLint = 0
+    const internalFormat: GLint = gl.RGB
+    const width: GLsizei = 1
+    const height: GLsizei = 1
+    const border: GLint = 0
+    const srcFormat: GLenum = gl.RGB
+    const srcType: GLenum = gl.UNSIGNED_BYTE
+    let pixel: Uint8Array // opaque blue
     if (gamma) {
       pixel = new Uint8Array([
         Math.pow(buffer[0], 1.0 / 2.2) * 255,
@@ -82,7 +87,7 @@ export class Texture {
     this.CreateMipmap(gl, width, height)
   }
 
-  CreateMipmap(gl, width, height) {
+  CreateMipmap(gl: WebGLRenderingContext, width: GLsizei, height: GLsizei) {
     gl.bindTexture(gl.TEXTURE_2D, this.texture)
 
     // WebGL1 has different requirements for power of 2 images
@@ -105,6 +110,6 @@ export class Texture {
   }
 }
 
-function isPowerOf2(value) {
+function isPowerOf2(value: number) {
   return (value & (value - 1)) == 0
 }

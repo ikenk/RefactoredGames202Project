@@ -1,6 +1,7 @@
 import { mat4 } from 'gl-matrix'
 
 import type { Vec3 } from '@/types/math'
+import type { vec3 } from 'gl-matrix'
 import type { LightUp, LightParams } from '@/types/light'
 import type { Light } from '@/types/light'
 import { FBO } from '@/textures/FBO'
@@ -63,7 +64,7 @@ export class DirectionalLight implements Light {
    * 返回光源方向的反向，用于光照计算中确定光线的入射方向(从shading point到光源)
    * @returns {Array<number>} 着色方向向量，格式为[x, y, z]
    */
-  CalcShadingDirection(): Vec3 {
+  CalcDirectionalShadingDirection(): Vec3 {
     let lightDir: Vec3 = [-this.lightDir['x'], -this.lightDir['y'], -this.lightDir['z']]
     return lightDir
   }
@@ -73,8 +74,8 @@ export class DirectionalLight implements Light {
    * 用于阴影映射，从光源的视角渲染场景
    * @returns {mat4} 光源的视图投影矩阵
    */
-  CalcLightVP(): mat4 {
-    let lightVP = mat4.create()
+  CalcDirectionalLightVP(): mat4 {
+    let lightViewProjectMatrix = mat4.create()
     let viewMatrix = mat4.create()
     let projectionMatrix = mat4.create()
 
@@ -88,8 +89,20 @@ export class DirectionalLight implements Light {
     // Projection transform 由于定向光源（如太阳光）被认为是来自无限远处的平行光线，所以使用正交投影
     mat4.ortho(projectionMatrix, -10, 10, -10, 10, 1e-2, 1000)
     // VP transform lightVP = projectionMatrix × viewMatrix
-    mat4.multiply(lightVP, projectionMatrix, viewMatrix)
+    mat4.multiply(lightViewProjectMatrix, projectionMatrix, viewMatrix)
 
-    return lightVP
+    return lightViewProjectMatrix
+  }
+
+  CalcDirectionalLightMVP(translate: Vec3, scale: Vec3): mat4 {
+    let modelMatrix = mat4.create()
+    mat4.translate(modelMatrix, modelMatrix, translate)
+    mat4.scale(modelMatrix, modelMatrix, scale)
+
+    let lightViewProjectMatrix = this.CalcDirectionalLightVP()
+
+    let lightModelViewProjectionMatrix = mat4.create()
+    mat4.multiply(lightModelViewProjectionMatrix, lightViewProjectMatrix, modelMatrix)
+    return lightModelViewProjectionMatrix
   }
 }

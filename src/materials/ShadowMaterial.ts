@@ -2,9 +2,9 @@ import { Material } from '@/materials/Material'
 import { getShaderString } from '@/loaders/loadShader'
 import { Light } from '@/types/light'
 
-class ShadowMaterial extends Material {
+export class ShadowMaterial extends Material {
   constructor(light: Light, vertexShader: string, fragmentShader: string) {
-    let lightVP = light.CalcLightVP()
+    let lightVP = light.CalcDirectionalLightVP()
 
     super(
       {

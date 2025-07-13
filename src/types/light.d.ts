@@ -1,4 +1,4 @@
-import type { mat4 } from 'gl-matrix'
+import type { mat3, mat4, vec3 } from 'gl-matrix'
 import type { Vec3 } from './math'
 import type { UpdatedParamters } from '@/types/MeshRender'
 
@@ -25,10 +25,12 @@ export interface Light {
   mesh: Mesh
   material: EmissiveMaterial
   lightPos: LightParams['lightPos']
-  lightDir: LightParams['lightDir']
-  lightUp: LightUp
+  lightDir?: LightParams['lightDir']
+  lightUp?: LightUp
   fbo: WebGLFramebuffer
 
-  CalcShadingDirection(): Vec3
-  CalcLightVP(): mat4
+  // Directional Light
+  CalcDirectionalShadingDirection?(): Vec3
+  CalcDirectionalLightVP?(): mat4
+  CalcDirectionalLightMVP?(translate: Vec3, scale: Vec3): mat4
 }
