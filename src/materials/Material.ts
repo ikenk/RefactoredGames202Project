@@ -1,5 +1,4 @@
 import { Shader } from '@/shaders/Shader'
-import { FBO } from '@/textures/FBO'
 
 interface Uniforms {
   [name: string]: { type: string; value: any }
