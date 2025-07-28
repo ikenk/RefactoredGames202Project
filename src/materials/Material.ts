@@ -1,8 +1,4 @@
-import { Shader } from '@/shaders/Shader'
-
-interface Uniforms {
-  [name: string]: { type: string; value: any }
-}
+import type { Uniforms } from '@/types/Material'
 
 export class Material {
   // public
