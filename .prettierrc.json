@@ -1,9 +1,26 @@
 {
-    "$schema": "https://json.schemastore.org/prettierrc",
-    "semi": false,
-    "singleQuote": true,
-    "printWidth": 100,
-    "trailingComma": "none",
-    "endOfLine": "auto",
-    "tabWidth": 2
+  "$schema": "https://json.schemastore.org/prettierrc",
+  "semi": false,
+  "singleQuote": true,
+  "printWidth": 100,
+  "trailingComma": "none",
+  "endOfLine": "auto",
+  "tabWidth": 2,
+  "plugins": ["prettier-plugin-glsl"],
+
+  "overrides": [
+    {
+      "files": ["*.glsl", "*.vert", "*.frag", "*.vs", "*.fs", "*.glslf", "*.glslv"],
+      "options": {
+        "parser": "glsl-parser",
+        "printWidth": 120,
+        "tabWidth": 2,
+        "useTabs": false,
+        "semi": true,
+        "singleQuote": false,
+        "bracketSpacing": true,
+        "bracketSameLine": true
+      }
+    }
+  ]
 }
