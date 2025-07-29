@@ -6,13 +6,13 @@ export class Shader {
 
   constructor(
     gl: WebGLRenderingContext,
-    vsSrc: string,
-    fsSrc: string,
+    vertexShaderContent: string,
+    fragmentShaderContent: string,
     shaderParameters: ShaderParameters
   ) {
     this.gl = gl
-    const vs = this.compileShader(vsSrc, gl.VERTEX_SHADER)
-    const fs = this.compileShader(fsSrc, gl.FRAGMENT_SHADER)
+    const vs = this.compileShader(vertexShaderContent, gl.VERTEX_SHADER)
+    const fs = this.compileShader(fragmentShaderContent, gl.FRAGMENT_SHADER)
 
     this.program = this.addShaderLocations(
       {
