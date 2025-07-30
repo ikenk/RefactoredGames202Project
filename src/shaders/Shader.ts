@@ -14,12 +14,7 @@ export class Shader {
     const vs = this.compileShader(vertexShaderContent, gl.VERTEX_SHADER)
     const fs = this.compileShader(fragmentShaderContent, gl.FRAGMENT_SHADER)
 
-    this.program = this.addShaderLocations(
-      {
-        glShaderProgram: this.linkShader(vs, fs)
-      },
-      shaderParameters
-    )
+    this.program = this.addShaderLocations(this.linkShader(vs, fs), shaderParameters)
     // console.log(this.program)
   }
 
@@ -50,12 +45,18 @@ export class Shader {
     return program
   }
 
+  /**
+   * 添加 Shader 中的 attri 和 uniform 的定位
+   * @param {WebGLShader} glShaderProgram 已经链接完毕的 shader 对象
+   * @param {ShaderParameters} shaderParameters 简单的例子 {uniforms:['uViewMatrix', 'uModelMatrix', 'uProjectionMatrix', 'uCameraPos'],attribs:['aVertexPosition','aNormalPosition','aTextureCoord']}
+   * @returns {ShaderProgram}
+   */
   addShaderLocations(
-    glShaderProgramObj: Omit<ShaderProgram, 'uniforms' | 'attribs'>,
+    glShaderProgram: WebGLShader,
     shaderParameters: ShaderParameters
   ): ShaderProgram {
-    const result = {
-      ...glShaderProgramObj,
+    const result: ShaderProgram = {
+      glShaderProgram,
       uniforms: {},
       attribs: {}
     }
