@@ -5,14 +5,16 @@ import { GUI } from 'dat.gui'
 
 import { WebGLRenderer } from '@/renderers/WebGLRenderer'
 import { FBO } from '@/textures/FBO'
+import { loadWater } from '@/managers/water/WaterRenderManager'
+import { WaterPresets } from '@/managers/water/WaterPresets'
 import { loadGLTF } from '@/loaders/loadGLTF'
 import { DirectionalLight } from '@/lights/DirectionalLight'
 
-import type { LightParams } from './types/light'
+import type { LightParams } from '@/types/light'
 import type { CameraType, SceneType, LightType } from '@/types/engine'
-import { Vec3 } from './types/math'
+import { Vec3 } from '@/types/math'
 
-import { PerformanceMonitor } from './Monitors/PerformanceMonitor'
+import { PerformanceMonitor } from '@/monitors/PerformanceMonitor'
 
 export class Engine {
   // public
@@ -64,7 +66,9 @@ export class Engine {
     this.initRenderer()
     // 加载场景
     // this.loadSceneGLTF('CubeScene')
-    this.loadSceneGLTF('CaveScene')
+    // this.loadSceneGLTF('CaveScene')
+    // 加载水场景
+    loadWater(this.renderer, WaterPresets.createCalmLake())
     // 加载灯光
     // this.addLight('CubeLight')
     this.addLight('CaveLight')
