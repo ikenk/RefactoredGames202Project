@@ -21,7 +21,7 @@ export class Material {
     fragmentShaderContent: string,
     frameBuffer: WebGLFramebuffer | null
   ) {
-    this.uniforms = uniforms
+    this.uniforms = uniforms // 留给 MeshRender.bindMaterialParameters() 函数使用的
     this.attribs = attribs
     this.vertexShaderContent = vertexShaderContent
     this.fragmentShaderContent = fragmentShaderContent
