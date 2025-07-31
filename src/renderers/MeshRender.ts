@@ -184,6 +184,8 @@ export class MeshRender {
         gl.uniformMatrix4fv(this.shader.program.uniforms[k], false, this.material.uniforms[k].value)
       } else if (this.material.uniforms[k].type == '3fv') {
         gl.uniform3fv(this.shader.program.uniforms[k], this.material.uniforms[k].value)
+      } else if (this.material.uniforms[k].type == '2fv') {
+        gl.uniform2fv(this.shader.program.uniforms[k], this.material.uniforms[k].value)
       } else if (this.material.uniforms[k].type == '1f') {
         gl.uniform1f(this.shader.program.uniforms[k], this.material.uniforms[k].value)
       } else if (this.material.uniforms[k].type == '1i') {
