@@ -68,7 +68,8 @@ export class Engine {
     // this.loadSceneGLTF('CubeScene')
     // this.loadSceneGLTF('CaveScene')
     // 加载水场景
-    loadWater(this.renderer, WaterPresets.createCalmLake())
+    // loadWater(this.renderer, WaterPresets.createCalmLake())
+    loadWater(this.renderer, WaterPresets.createGerstnerWaves())
     // 加载灯光
     // this.addLight('CubeLight')
     this.addLight('CaveLight')
