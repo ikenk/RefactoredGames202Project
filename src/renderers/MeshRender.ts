@@ -188,6 +188,10 @@ export class MeshRender {
         gl.uniform2fv(this.shader.program.uniforms[k], this.material.uniforms[k].value)
       } else if (this.material.uniforms[k].type == '1f') {
         gl.uniform1f(this.shader.program.uniforms[k], this.material.uniforms[k].value)
+      } else if (this.material.uniforms[k].type == '3iv') {
+        gl.uniform3iv(this.shader.program.uniforms[k], this.material.uniforms[k].value)
+      } else if (this.material.uniforms[k].type == '2iv') {
+        gl.uniform2iv(this.shader.program.uniforms[k], this.material.uniforms[k].value)
       } else if (this.material.uniforms[k].type == '1i') {
         gl.uniform1i(this.shader.program.uniforms[k], this.material.uniforms[k].value)
       } else if (this.material.uniforms[k].type == 'texture') {
