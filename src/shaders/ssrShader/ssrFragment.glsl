@@ -20,7 +20,7 @@ varying highp vec4 vPosWorld;
 #define INV_TWO_PI 0.15915494309
 
 float Rand1(inout float p) {
-  p = fract(p * .1031);
+  p = fract(p * 0.1031);
   p *= p + 33.33;
   p *= p + p;
   return fract(p);
@@ -31,7 +31,7 @@ vec2 Rand2(inout float p) {
 }
 
 float InitRand(vec2 uv) {
-	vec3 p3  = fract(vec3(uv.xyx) * .1031);
+  vec3 p3 = fract(vec3(uv.xyx) * 0.1031);
   p3 += dot(p3, p3.yzx + 33.33);
   return fract((p3.x + p3.y) * p3.z);
 }
@@ -40,7 +40,7 @@ vec3 SampleHemisphereUniform(inout float s, out float pdf) {
   vec2 uv = Rand2(s);
   float z = uv.x;
   float phi = uv.y * TWO_PI;
-  float sinTheta = sqrt(1.0 - z*z);
+  float sinTheta = sqrt(1.0 - z * z);
   vec3 dir = vec3(sinTheta * cos(phi), sinTheta * sin(phi), z);
   pdf = INV_TWO_PI;
   return dir;
@@ -125,8 +125,8 @@ vec3 EvalDiffuse(vec3 wi, vec3 wo, vec2 uv) {
   vec3 L = vec3(0.0);
   vec3 albedo = GetGBufferDiffuse(uv);
   vec3 normal = GetGBufferNormalWorld(uv);
-  float cosine = max(0., dot(normal, wi));
-  L = (albedo * INV_PI) * cosine;
+  float cosine = max(0.0, dot(normal, wi));
+  L = albedo * INV_PI * cosine;
 
   return L;
 }
@@ -150,12 +150,12 @@ bool RayMarch(vec3 ori, vec3 dir, out vec3 hitPos) {
 
   vec3 curPos = ori;
 
-  for(int stepCount = 0; stepCount < totalStepCount; stepCount++){
+  for (int stepCount = 0; stepCount < totalStepCount; stepCount++) {
     vec2 screenUV = GetScreenCoordinate(curPos);
     float rayDepth = GetDepth(curPos);
     float gBufferDepth = GetGBufferDepth(screenUV);
 
-    if(rayDepth - gBufferDepth > 0.0001){
+    if (rayDepth - gBufferDepth > 0.0001) {
       hitPos = curPos;
       return true;
     }
@@ -163,7 +163,6 @@ bool RayMarch(vec3 ori, vec3 dir, out vec3 hitPos) {
     curPos += normalize(dir) * step;
   }
 
-  
   return false;
 }
 
@@ -173,11 +172,11 @@ vec3 EvalReflect(vec3 wi, vec3 wo, vec2 screenUV) {
   vec3 reflectDir = normalize(reflect(-wo, normal));
   vec3 hitPos;
 
-  if(RayMarch(vPosWorld.xyz, reflectDir, hitPos)){
+  if (RayMarch(vPosWorld.xyz, reflectDir, hitPos)) {
     vec2 screenUV = GetScreenCoordinate(hitPos);
     return GetGBufferDiffuse(screenUV);
   } else {
-    return vec3(0.);
+    return vec3(0.0);
   }
 }
 
@@ -201,8 +200,8 @@ void main() {
   // L = (GetGBufferDiffuse(screenUV) + EvalReflect(wi, wo, screenUV)) / 2.;
 
   // 间接光照
-  vec3 L_indirect = vec3(0.);
-  for(int i = 0; i < SAMPLE_NUM; i++) {
+  vec3 L_indirect = vec3(0.0);
+  for (int i = 0; i < SAMPLE_NUM; i++) {
     float pdf;
     vec3 localDir = SampleHemisphereCos(s, pdf);
     vec3 normal = GetGBufferNormalWorld(screenUV);
@@ -211,9 +210,10 @@ void main() {
     vec3 dir = normalize(mat3(b1, b2, normal) * localDir);
 
     vec3 hitPos;
-    if(RayMarch(worldPos, dir, hitPos)) {
+    if (RayMarch(worldPos, dir, hitPos)) {
       vec2 hitScreenUV = GetScreenCoordinate(hitPos);
-      L_indirect += EvalDiffuse(dir, wo, screenUV) / pdf * EvalDiffuse(wi, -dir, hitScreenUV) * EvalDirectionalLight(hitScreenUV);
+      L_indirect +=
+        EvalDiffuse(dir, wo, screenUV) / pdf * EvalDiffuse(wi, -dir, hitScreenUV) * EvalDirectionalLight(hitScreenUV);
     }
   }
 

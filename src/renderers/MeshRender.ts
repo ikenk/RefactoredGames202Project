@@ -69,10 +69,10 @@ export class MeshRender {
 
     // console.log(extraAttribs)
 
-    // 将 vertex 中包含的所有 atrri 写入 material
+    // 将 vertex 中包含的所有 atrri 写入 material 中的 flatten_attribs 属性
     this.material.setMeshAttribs(extraAttribs)
 
-    // 创建与 material 对应的 shader
+    // 此时 material 中的 flatten_attribs 和 flatten_uniforms 已经准备完毕，可以创建对应的 shader 了
     this.shader = this.material.compile(this.gl)
   }
 
@@ -171,7 +171,10 @@ export class MeshRender {
     ])
   }
 
-  // 利用 material 修改（写入）shader 中的 uniform 数据
+  /**
+   * 利用 material 修改（写入）shader 中的 uniform 数据
+   * @param {Record<string, WebGLUniformLocation>} this.shader.program.uniforms 简单举例 {name:uniformLocation}，因此 this.shader.program.uniforms[k] 就是 uniformLocation
+   */
   bindMaterialParameters() {
     const gl = this.gl
 
@@ -181,8 +184,14 @@ export class MeshRender {
         gl.uniformMatrix4fv(this.shader.program.uniforms[k], false, this.material.uniforms[k].value)
       } else if (this.material.uniforms[k].type == '3fv') {
         gl.uniform3fv(this.shader.program.uniforms[k], this.material.uniforms[k].value)
+      } else if (this.material.uniforms[k].type == '2fv') {
+        gl.uniform2fv(this.shader.program.uniforms[k], this.material.uniforms[k].value)
       } else if (this.material.uniforms[k].type == '1f') {
         gl.uniform1f(this.shader.program.uniforms[k], this.material.uniforms[k].value)
+      } else if (this.material.uniforms[k].type == '3iv') {
+        gl.uniform3iv(this.shader.program.uniforms[k], this.material.uniforms[k].value)
+      } else if (this.material.uniforms[k].type == '2iv') {
+        gl.uniform2iv(this.shader.program.uniforms[k], this.material.uniforms[k].value)
       } else if (this.material.uniforms[k].type == '1i') {
         gl.uniform1i(this.shader.program.uniforms[k], this.material.uniforms[k].value)
       } else if (this.material.uniforms[k].type == 'texture') {
