@@ -78,7 +78,7 @@ export class GerstnerWaveMaterial extends WaterMaterial {
       }
     }
 
-    console.log(gerstnerWaveUniforms)
+    // console.log(gerstnerWaveUniforms)
 
     super(
       defaultGerstnereMaterialWaveParams,
