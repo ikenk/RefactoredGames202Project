@@ -1,0 +1,83 @@
+# Clang-Format 配置文件
+
+# 基础配置
+Language: Cpp # 语言类型，对 GLSL 也适用
+BasedOnStyle: Google # 基于 Google 代码风格
+Standard: Auto # 自动检测 C++ 标准
+
+# 缩进设置
+IndentWidth: 2 # 缩进宽度：2 个空格
+TabWidth: 2 # Tab 宽度：2 个空格
+UseTab: Never # 永不使用 Tab，只用空格
+IndentCaseLabels: true # switch case 标签缩进
+IndentPPDirectives: None # 预处理指令不额外缩进
+
+# 行长度和换行 - 针对中文优化
+ColumnLimit: 100 # 增加行长度以容纳中文注释
+AllowShortFunctionsOnASingleLine: Empty # 允许短函数在单行（仅内联）
+AllowShortIfStatementsOnASingleLine: WithoutElse # 短if语句可单行（无else时）
+AllowShortLoopsOnASingleLine: true # 短循环可单行
+AllowShortBlocksOnASingleLine: Never # 不允许短代码块单行（保持一致性）
+AllowShortCaseLabelsOnASingleLine: false # case 标签不允许单行
+
+# 大括号风格
+BreakBeforeBraces: Attach # 大括号不换行（K&R 风格）
+
+# 空格设置
+SpaceBeforeParens: ControlStatements # 控制语句前加空格：if (condition)
+SpaceInEmptyParentheses: false # 空括号内不加空格：func()
+SpacesInParentheses: false # 括号内不加空格：func(a, b)
+SpacesInSquareBrackets: false # 方括号内不加空格：array[index]
+SpaceBeforeAssignmentOperators: true # 赋值运算符前后加空格：a = b
+SpaceAfterCStyleCast: false # C风格转换后不加空格：(int)value
+
+# 指针和引用对齐
+PointerAlignment: Left # 指针对齐到左侧：int* ptr
+ReferenceAlignment: Left # 引用对齐到左侧：int& ref
+# 可选值：Left, Right, Middle
+
+# 函数和参数格式化 - 优化多参数对齐
+BinPackParameters: false # 不紧凑排列参数（每个参数一行）
+BinPackArguments: false # 不紧凑排列实参（每个实参一行）
+AllowAllParametersOfDeclarationOnNextLine: true # 允许参数换行
+AllowAllArgumentsOnNextLine: true # 允许实参换行
+
+# 初始化列表
+BreakConstructorInitializers: BeforeColon # 构造函数初始化列表在冒号前换行
+ConstructorInitializerIndentWidth: 4 # 构造函数初始化列表缩进宽度
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+
+# 注释格式 - 针对中文注释优化
+ReflowComments: false # 不重新格式化注释（避免中文换行问题）
+SpacesBeforeTrailingComments: 2 # 行尾注释前的空格数
+AlignTrailingComments: false # 不强制对齐行尾注释（避免中文对齐问题）
+
+# 空行控制
+MaxEmptyLinesToKeep: 1 # 最多保留 1 个空行
+KeepEmptyLinesAtTheStartOfBlocks: false # 代码块开始不保留空行
+
+# 排序和对齐
+SortIncludes: true # 自动排序 #include
+SortUsingDeclarations: true # 排序 using 声明
+AlignConsecutiveAssignments: false # 不对齐连续赋值
+AlignConsecutiveDeclarations: false # 不对齐连续声明
+AlignOperands: true # 对齐操作数
+
+# 其他设置
+Cpp11BracedListStyle: true # C++11 大括号列表风格
+DerivePointerAlignment: false # 不自动推导指针对齐方式
+DisableFormat: false # 启用格式化
+FixNamespaceComments: true # 修复命名空间注释
+
+# GLSL 特定的有用设置
+AlwaysBreakAfterReturnType: None # 返回类型后不强制换行
+AlwaysBreakBeforeMultilineStrings: false # 多行字符串前不强制换行
+BreakBeforeBinaryOperators: None # 二元运算符不前置换行
+BreakStringLiterals: true # 允许拆分字符串字面量
+
+# 宏定义格式化
+AlignConsecutiveMacros: false # 不对齐连续宏定义
+
+# 实验性功能
+ExperimentalAutoDetectBinPacking: false # 不自动检测参数打包
+
