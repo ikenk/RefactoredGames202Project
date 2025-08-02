@@ -6,7 +6,7 @@ export class FBO {
   private height: number
 
   public framebuffer: WebGLFramebuffer
-  private depthBuffer: WebGLRenderbuffer
+  private renderBufferObject: WebGLRenderbuffer
 
   constructor(
     gl: WebGLRenderingContext,
@@ -28,7 +28,7 @@ export class FBO {
   }
 
   // 初始化 framebuffer
-  initFrameBuffer() {
+  private initFrameBuffer() {
     //创建帧缓冲区对象
     this.framebuffer = this.gl.createFramebuffer()
     if (!this.framebuffer) {
@@ -38,10 +38,12 @@ export class FBO {
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer)
 
     const GBufferNum = 5
+    // 给 WebGL 的 framebuffer 按上两个原来没有的 attachments 和 textures 属性
     this.framebuffer.attachments = []
     this.framebuffer.textures = []
     for (let i = 0; i < GBufferNum; i++) {
       let attachment: GLenum = this.gl_draw_buffers['COLOR_ATTACHMENT' + i + '_WEBGL']
+      // 将 texture 作为 framebuffer 中的 color_attachment 中的 buffer
       let texture = this.CreateAndBindColorTargetTexture(attachment)
       this.framebuffer.attachments.push(attachment)
       this.framebuffer.textures.push(texture)
@@ -65,7 +67,7 @@ export class FBO {
   }
 
   //创建纹理对象并设置其尺寸和参数
-  CreateAndBindColorTargetTexture(attachment: GLenum): WebGLTexture {
+  private CreateAndBindColorTargetTexture(attachment: GLenum): WebGLTexture {
     let texture = this.gl.createTexture()
     if (!texture) {
       console.log('无法创建纹理对象')
@@ -92,25 +94,29 @@ export class FBO {
     return texture
   }
 
-  // 创建深度缓冲区
+  // 创建渲染缓冲对象，其为 depth buffer 的一种实现方式，深度测试时使用这个 rbo
+  // 详见 https://learnopengl-cn.github.io/04%20Advanced%20OpenGL/05%20Framebuffers/
   createDepthBuffer(): void {
-    // Create depth buffer
-    this.depthBuffer = this.gl.createRenderbuffer() // Create a renderbuffer object
-    if (!this.depthBuffer) {
-      throw new Error('无法创建深度缓冲区')
+    // 创建一个 renderbuffer object（渲染缓冲对象）存储 depth test 时的信息
+    this.renderBufferObject = this.gl.createRenderbuffer()
+    if (!this.renderBufferObject) {
+      throw new Error('无法创建渲染缓冲对象')
     }
-    this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, this.depthBuffer) // Bind the object to target
+    // 将 rbo 绑定到当前的 RENDERBUFFER 槽中
+    this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, this.renderBufferObject)
+    // 为当前绑定到 RENDERBUFFER 槽位的数据（即 rbo）分配内存，内部数据格式为 DEPTH_COMPONENT16
     this.gl.renderbufferStorage(
-      this.gl.RENDERBUFFER,
-      this.gl.DEPTH_COMPONENT16,
-      this.width,
-      this.height
+      this.gl.RENDERBUFFER, // 操作目标，表示当前绑定到 RENDERBUFFER 槽位的对象
+      this.gl.DEPTH_COMPONENT16, // 内部格式，16 位深度格式，每像素 2 字节
+      this.width, // 渲染缓冲的宽度尺寸
+      this.height // 渲染缓冲的高度尺寸
     )
+    // 将指定的 rbo 附加到当前帧缓冲的 DEPTH_ATTACHMENT，建立引用关系
     this.gl.framebufferRenderbuffer(
-      this.gl.FRAMEBUFFER,
-      this.gl.DEPTH_ATTACHMENT,
-      this.gl.RENDERBUFFER,
-      this.depthBuffer
+      this.gl.FRAMEBUFFER, // 帧缓冲目标，操作当前绑定的 framebuffer
+      this.gl.DEPTH_ATTACHMENT, // 深度附件点，帧缓冲内部专门用于深度测试的"插槽"
+      this.gl.RENDERBUFFER, // 对象类型，表明要附加渲染缓冲（不是纹理）
+      this.renderBufferObject // 具体的渲染缓冲对象 ID
     )
   }
 
@@ -130,9 +136,9 @@ export class FBO {
     this.framebuffer.textures = []
 
     // 删除深度缓冲区
-    if (this.depthBuffer) {
-      this.gl.deleteRenderbuffer(this.depthBuffer)
-      this.depthBuffer = null
+    if (this.renderBufferObject) {
+      this.gl.deleteRenderbuffer(this.renderBufferObject)
+      this.renderBufferObject = null
     }
 
     // 删除帧缓冲区
