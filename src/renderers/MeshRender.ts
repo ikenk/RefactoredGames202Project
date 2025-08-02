@@ -199,6 +199,11 @@ export class MeshRender {
         gl.bindTexture(this.gl.TEXTURE_2D, this.material.uniforms[k].value)
         gl.uniform1i(this.shader.program.uniforms[k], textureNum)
         textureNum += 1
+      } else if (this.material.uniforms[k].type == 'textureCube') {
+        gl.activeTexture(this.gl.TEXTURE0 + textureNum)
+        gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.material.uniforms[k].value)
+        gl.uniform1i(this.shader.program.uniforms[k], textureNum)
+        textureNum += 1
       }
     }
   }
