@@ -10,14 +10,14 @@ export const FFT_OCEAN_MATERIAL_OVERRIDES: FFTOceanMaterialConfig = {
   // waterColor: [0.2, 0.6, 0.8],
   // deepWaterColor: [0.3, 0.3, 0.3],
 
-  deepWaterColor: [0.01, 0.05, 0.15], // 深海深蓝
-  waterColor: [0.05, 0.25, 0.45], // 中等蓝
-  shallowWaterColor: [0.15, 0.5, 0.7], // 浅海青蓝（不要太绿）
+  // deepWaterColor: [0.01, 0.05, 0.15], // 深海深蓝
+  // waterColor: [0.05, 0.25, 0.45], // 中等蓝
+  // shallowWaterColor: [0.15, 0.5, 0.7], // 浅海青蓝（不要太绿）
   reflectance: 0.8,
   maxDepth: 1000.0,
-  minDepth: 1000.0,
-  magnificationXZ: 1.0,
-  magnificationY: 1.0
+  minDepth: 1000.0
+  // magnificationXZ: 1.0,
+  // magnificationY: 1.0
 }
 
 /**
@@ -138,7 +138,7 @@ export const DEFAULT_FFT_OCEAN_CONFIG: FFTOceanConfig = {
   },
 
   // ==================== Renderer ====================
-  renderingMode: 'mesh',
+  renderingMode: 'MESH',
 
   // ==================== FFT Calculate ====================
   oceanParams: {
@@ -146,7 +146,7 @@ export const DEFAULT_FFT_OCEAN_CONFIG: FFTOceanConfig = {
     size: 256, // uGeometrySize -- 海面尺寸 L
     fftResolution: 256, // uTextureSize -- 采样数量 N
     amplitude: 1,
-    choppiness: 1.8,
+    choppiness: [1.8, 1.8],
     windSpeed: 7,
     windDirection: { x: 1, y: 1 },
     gravity: 9.81,

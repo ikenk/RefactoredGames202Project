@@ -77,14 +77,14 @@ export const ShaderPaths = {
 
   // ==================== Ocean ====================
   // FFT Ocean
-  FFT_OCEAN_VERTEX: urlJoin(S, 'water/fftOcean/vertex.vert'),
-  FFT_OCEAN_FRAGMENT: urlJoin(S, 'water/fftOcean/fragment.frag'),
+  // FFT_OCEAN_VERTEX: urlJoin(S, 'water/fftOcean/vertex.vert'),
+  // FFT_OCEAN_FRAGMENT: urlJoin(S, 'water/fftOcean/fragment.frag'),
   FFT_OCEAN_MULTI_LAYERS_VERTEX: urlJoin(S, 'water/fftOcean/vertex-multi-layers.vert'),
   FFT_OCEAN_MULTI_LAYERS_FRAGMENT: urlJoin(S, 'water/fftOcean/fragment-multi-layers.frag'),
   // FFT Ocean -- Compute Shader
-  FFT_STOCKHAM_VERTEX: urlJoin(S, 'water/fftOcean/compute/FFTStockham/FFTStockham.vert'),
-  FFT_STOCKHAM_1D_FRAGMENT: urlJoin(S, 'water/fftOcean/compute/FFTStockham/FFTStockham1D.frag'),
-  FFT_STOCKHAM_2D_FRAGMENT: urlJoin(S, 'water/fftOcean/compute/FFTStockham/FFTStockham2D.frag'),
+  FFT_STOCKHAM_VERTEX: urlJoin(S, 'water/fftOcean/compute/fftStockham/FFTStockham.vert'),
+  FFT_STOCKHAM_1D_FRAGMENT: urlJoin(S, 'water/fftOcean/compute/fftStockham/FFTStockham1D.frag'),
+  FFT_STOCKHAM_2D_FRAGMENT: urlJoin(S, 'water/fftOcean/compute/fftStockham/FFTStockham2D.frag'),
   FFT_PACKED_ASSEMBLY_VERTEX: urlJoin(S, 'water/fftOcean/compute/packedAssembly/vertex.vert'),
   FFT_PACKED_ASSEMBLY_FRAGMENT: urlJoin(S, 'water/fftOcean/compute/packedAssembly/fragment.frag'),
   FFT_REALTIME_SPECTRUM_VERTEX: urlJoin(S, 'water/fftOcean/compute/realtimeSpectrum/vertex.vert'),
@@ -93,11 +93,11 @@ export const ShaderPaths = {
     'water/fftOcean/compute/realtimeSpectrum/fragment.frag'
   ),
   // Sine Wave
-  SINE_WAVE_VERTEX: urlJoin(S, 'ocean/sinWave/vertex.vert'),
-  SINE_WAVE_FRAGMENT: urlJoin(S, 'ocean/sinWave/fragment.frag'),
+  SINE_WAVE_VERTEX: urlJoin(S, 'water/simpleWaves/sineWave/vertex.vert'),
+  SINE_WAVE_FRAGMENT: urlJoin(S, 'water/simpleWaves/sineWave/fragment.frag'),
   // Gerstner Wave
-  GERSTNER_WAVE_VERTEX: urlJoin(S, 'ocean/gerstnerWave/vertex.vert'),
-  GERSTNER_WAVE_FRAGMENT: urlJoin(S, 'ocean/gerstnerWave/fragment.frag'),
+  GERSTNER_WAVE_VERTEX: urlJoin(S, 'water/simpleWaves/gerstnerWave/vertex.vert'),
+  GERSTNER_WAVE_FRAGMENT: urlJoin(S, 'water/simpleWaves/gerstnerWave/fragment.frag'),
 
   // ==================== Shadertoy ====================
   SHADERTOY_COMMON_VERTEX: urlJoin(S, 'shadertoy/commonVertex.vert'),
