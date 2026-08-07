@@ -1,5 +1,6 @@
-import { OceanParams } from '../fft/types/OceanParams'
-import { Spectrum } from './Spectrum'
+import type { Spectrum } from './Spectrum'
+import { ResolvedCapillarySpectrumConfig } from './types/CapillarySpectrumConfig'
+import type { SpectrumEvaluationContext } from './types/SpectrumEvaluationContext'
 
 /**
  * 毛细波谱（Capillary Wave Spectrum）
@@ -17,22 +18,27 @@ import { Spectrum } from './Spectrum'
  */
 export class CapillarySpectrum implements Spectrum {
   /** 基础振幅 */
-  private readonly baseAmplitude = 0.001
+  private readonly baseAmplitude: number
   /** 截止波数 (rad/m) */
-  private readonly cutoffWavenumber = 100
+  private readonly cutoffWavenumber: number
+  private readonly surfaceTension: number
+  private readonly waterDensity: number
 
-  calculateH0Magnitude(kx: number, kz: number, params: OceanParams): number {
+  constructor(config: ResolvedCapillarySpectrumConfig) {
+    this.baseAmplitude = config.baseAmplitude
+    this.cutoffWavenumber = config.cutoffWavenumber
+    this.surfaceTension = config.surfaceTension
+    this.waterDensity = config.waterDensity
+  }
+
+  calculateH0Magnitude(kx: number, kz: number, context: SpectrumEvaluationContext): number {
     const k = Math.sqrt(kx * kx + kz * kz)
 
-    // 低于 1 rad/m 不考虑毛细波
     if (k < 1) return 0
 
-    const surfaceTension = 0.074 // N/m
-    const waterDensity = 1000 // kg/m³
+    const capillaryFactor = (this.surfaceTension * k * k * k) / this.waterDensity
 
-    // 毛细效应占比: σk³/ρ vs gk
-    const capillaryFactor = (surfaceTension * k * k * k) / waterDensity
-    const gravityFactor = params.gravity * k
+    const gravityFactor = context.gravity * k
 
     return (
       this.baseAmplitude *

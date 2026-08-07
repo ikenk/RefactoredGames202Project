@@ -1,6 +1,8 @@
-import { OceanParams } from '../fft/types/OceanParams'
-import { Spectrum } from './Spectrum'
-import { SpectrumSettings } from './types/SpectrumSettings'
+// import { OceanParams } from '../fft/types/OceanParams'
+import type { Spectrum } from './Spectrum'
+import type { JONSWAPSpectrumConfig } from './types/JONSWAPSpectrumConfig'
+import type { SpectrumSettings } from './types/SpectrumSettings'
+import type { SpectrumEvaluationContext } from './types/SpectrumEvaluationContext'
 
 /**
  * JONSWAP 波谱（参考 FFT-Ocean-Code-main / Tessendorf 流派）
@@ -51,23 +53,31 @@ export class JONSWAPSpectrum implements Spectrum {
   private readonly sigma_a = 0.07
   private readonly sigma_b = 0.09
 
-  // ========== 默认子谱（当 spectrum0/1 都缺失时的兜底）==========
-  private defaultSpectrum(params: OceanParams): SpectrumSettings {
-    const windDirDeg =
-      params.windDirection !== undefined
-        ? (Math.atan2(params.windDirection.y, params.windDirection.x) * 180) / Math.PI
-        : 0
-    return {
-      scale: params.amplitude ?? 1.0,
-      windSpeed: params.windSpeed ?? 5,
-      windDirection: windDirDeg,
-      fetch: params.fetch ?? 100000,
-      spreadBlend: 1.0,
-      swell: params.swellMixing ?? 0.0,
-      peakEnhancement: 3.3,
-      shortWavesFade: 0.01
-    }
+  private readonly primary: JONSWAPSpectrumConfig['primary']
+  private readonly secondary: JONSWAPSpectrumConfig['secondary']
+
+  constructor(config: JONSWAPSpectrumConfig) {
+    this.primary = config.primary
+    this.secondary = config.secondary
   }
+
+  // ========== 默认子谱（当 spectrum0/1 都缺失时的兜底）==========
+  // private defaultSpectrum(params: OceanParams): SpectrumSettings {
+  //   const windDirDeg =
+  //     params.windDirection !== undefined
+  //       ? (Math.atan2(params.windDirection.y, params.windDirection.x) * 180) / Math.PI
+  //       : 0
+  //   return {
+  //     scale: params.amplitude ?? 1.0,
+  //     windSpeed: params.windSpeed ?? 5,
+  //     windDirection: windDirDeg,
+  //     fetch: params.fetch ?? 100000,
+  //     spreadBlend: 1.0,
+  //     swell: params.swellMixing ?? 0.0,
+  //     peakEnhancement: 3.3,
+  //     shortWavesFade: 0.01
+  //   }
+  // }
 
   // ==================== 基础频率量 ====================
 
@@ -225,16 +235,22 @@ export class JONSWAPSpectrum implements Spectrum {
   }
 
   // ==================== 单子谱能量：spec = S·Φ·D·fade ====================
+  // private singleSpectrumEnergy(
+  //   kx: number,
+  //   kz: number,
+  //   params: OceanParams,
+  //   settings: SpectrumSettings
+  // ): number {
   private singleSpectrumEnergy(
     kx: number,
     kz: number,
-    params: OceanParams,
+    context: SpectrumEvaluationContext,
     settings: SpectrumSettings
   ): number {
     const kLength = Math.sqrt(kx * kx + kz * kz)
     if (kLength < 1e-6) return 0
 
-    const g = params.gravity
+    const g = context.gravity
     const omega = Math.sqrt(g * kLength)
     const wp = this.omegaPeak(settings.windSpeed, settings.fetch, g)
 
@@ -243,7 +259,7 @@ export class JONSWAPSpectrum implements Spectrum {
     //   params.depth && params.depth > 0 && params.depth < 50
     //     ? this.calTMACorrection(omega, params.depth, g)
     //     : 1.0
-    const tmaCorrection = params.depth ? this.calTMACorrection(omega, params.depth, g) : 1.0
+    const tmaCorrection = context.depth ? this.calTMACorrection(omega, context.depth, g) : 1.0
     const D = this.directionFactor(kx, kz, omega, wp, settings)
     const fade = this.shortWaveFade(kLength, settings.shortWavesFade)
 
@@ -252,28 +268,32 @@ export class JONSWAPSpectrum implements Spectrum {
   }
 
   // ==================== 对外 API：|h₀(k)| ====================
-  calculateH0Magnitude(kx: number, kz: number, params: OceanParams): number {
+  // calculateH0Magnitude(kx: number, kz: number, params: OceanParams): number {
+  calculateH0Magnitude(kx: number, kz: number, context: SpectrumEvaluationContext): number {
     const kLength = Math.sqrt(kx * kx + kz * kz)
     // k 截断范围，可调（很关键）
-    const kMin = params.kMin ?? 0.0001
-    const kMax = params.kMax ?? 9000.0
+    const kMin = context.kMin ?? 0.0001
+    const kMax = context.kMax ?? 9000.0
 
     if (kLength < kMin || kLength > kMax) return 0
 
     // 双子谱叠加（spec0 + spec1）
-    const s0 = params.spectrum0 ?? this.defaultSpectrum(params)
-    const spec0 = this.singleSpectrumEnergy(kx, kz, params, s0)
-    const spec1 = params.spectrum1 ? this.singleSpectrumEnergy(kx, kz, params, params.spectrum1) : 0
+    // const s0 = params.spectrum0 ?? this.defaultSpectrum(params)
+    // const spec0 = this.singleSpectrumEnergy(kx, kz, params, s0)
+    // const spec1 = params.spectrum1 ? this.singleSpectrumEnergy(kx, kz, params, params.spectrum1) : 0
+
+    const spec0 = this.singleSpectrumEnergy(kx, kz, context, this.primary)
+    const spec1 = this.secondary ? this.singleSpectrumEnergy(kx, kz, context, this.secondary) : 0
     const spec = spec0 + spec1
 
     // F 和 depth 是全局的（非子谱级别）, F = 2⋅ω⋅(dω/dk)
     // const F = this.calculateF(kLength, params.depth ?? 1000, params.gravity)
-    const dOmegadk = this.calDispersionDerivative(kLength, params.gravity, params.depth ?? 1000)
+    const dOmegadk = this.calDispersionDerivative(kLength, context.gravity, context.depth ?? 1000)
 
     // k -- 波数（波矢）= 2 * PI * m / L
     // Δk -- 波数（波矢）的精细程度 = 2 * PI * (m + 1) / L - 2 * PI * m / L = 2 * PI / L
     // |h₀|² = 2⋅S(ω,θ)⋅((dω/dk)⋅Δk)⋅((1/k)⋅Δk), Δk = 2·PI/L
-    const L = params.size
+    const L = context.size
     const amplitudeSquared =
       2 * ((spec * Math.abs(dOmegadk)) / kLength) * ((4 * Math.PI * Math.PI) / (L * L))
     // const amplitudeSquared = 2 * ((spec * Math.abs(F)) / k)

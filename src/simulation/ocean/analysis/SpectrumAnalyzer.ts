@@ -1,6 +1,8 @@
 import { Spectrum } from '../spectrums/Spectrum'
 import { OceanParams } from '../fft/types/OceanParams'
 import { SpectrumReport } from './types/SpectrumAnalyzer'
+import { SpectrumEvaluationContext } from '../spectrums/types/SpectrumEvaluationContext'
+import { FFTGridConfig } from '../fft/types/FFTGridConfig'
 
 export class SpectrumAnalyzer {
   private spectrum: Spectrum
@@ -19,12 +21,16 @@ export class SpectrumAnalyzer {
    *   方向能量分布
    */
   public analyze(
-    params: OceanParams,
+    // params: OceanParams,
+    grid: FFTGridConfig,
+    context: SpectrumEvaluationContext,
     radialBinCount = 32,
     directionalBinCount = 16
   ): SpectrumReport {
-    const N = params.fftResolution
-    const L = params.size
+    // const N = params.fftResolution
+    // const L = params.size
+    const N = grid.fftResolution
+    const L = grid.size
 
     // Δk = 2π / L
     const deltaK = (2.0 * Math.PI) / L
@@ -32,10 +38,14 @@ export class SpectrumAnalyzer {
     // Nyquist frequency
     const kNyquist = (Math.PI * N) / L
 
-    const radialBins = new Array(radialBinCount).fill(0)
-    const radialCounts = new Array(radialBinCount).fill(0)
+    // const radialBins = new Array(radialBinCount).fill(0)
+    // const radialCounts = new Array(radialBinCount).fill(0)
 
-    const directionalBins = new Array(directionalBinCount).fill(0)
+    // const directionalBins = new Array(directionalBinCount).fill(0)
+
+    const radialBins = new Array<number>(radialBinCount).fill(0)
+    const radialCounts = new Array<number>(radialBinCount).fill(0)
+    const directionalBins = new Array<number>(directionalBinCount).fill(0)
 
     let totalEnergy = 0
     let maxEnergy = 0
@@ -54,7 +64,8 @@ export class SpectrumAnalyzer {
         // ignore outside Nyquist
         if (kn > 1.0) continue
 
-        const energy = this.spectrum.calculateH0Magnitude(kx, kz, params)
+        // const energy = this.spectrum.calculateH0Magnitude(kx, kz, params)
+        const energy = this.spectrum.calculateH0Magnitude(kx, kz, context)
 
         totalEnergy += energy
         maxEnergy = Math.max(maxEnergy, energy)
@@ -62,8 +73,11 @@ export class SpectrumAnalyzer {
         //  radial shell averaging
         const radialIndex = Math.min(radialBinCount - 1, Math.floor(kn * radialBinCount))
 
-        radialBins[radialIndex] += energy
-        radialCounts[radialIndex]++
+        // radialBins[radialIndex] += energy
+        // radialCounts[radialIndex]++
+
+        radialBins[radialIndex] = (radialBins[radialIndex] ?? 0) + energy
+        radialCounts[radialIndex] = (radialCounts[radialIndex] ?? 0) + 1
 
         // directional histogram
         let theta = Math.atan2(kz, kx)
@@ -76,13 +90,15 @@ export class SpectrumAnalyzer {
           Math.floor((theta / (2.0 * Math.PI)) * directionalBinCount)
         )
 
-        directionalBins[directionIndex] += energy
+        // directionalBins[directionIndex] += energy
+        directionalBins[directionIndex] = (directionalBins[directionIndex] ?? 0) + energy
       }
     }
 
     // ==================== normalize radial ====================
     const radialNormalized = radialBins.map((v, i) => {
-      if (radialCounts[i] <= 0) return 0
+      // if (radialCounts[i] <= 0) return 0
+      if ((radialCounts[i] ?? 0) <= 0) return 0
       // 计算当前分箱对应的平均半径
       const kCenter = ((i + 0.5) / radialBinCount) * kNyquist
       // 壳层面积 = 2πkΔk
@@ -115,12 +131,18 @@ export class SpectrumAnalyzer {
   }
 
   // ==================== report print ====================
-  public printReport(report: SpectrumReport, params: OceanParams) {
+  public printReport(
+    report: SpectrumReport,
+    // params: OceanParams
+    grid: FFTGridConfig
+  ): void {
     console.log('========== FFT Calculation Parameters ==========')
 
-    console.log('FFT Size', params.size)
+    // console.log('FFT Size', params.size)
+    console.log('FFT Size', grid.size)
 
-    console.log('FFT Resolution', params.fftResolution)
+    // console.log('FFT Resolution', params.fftResolution)
+    console.log('FFT Resolution', grid.fftResolution)
 
     console.log('')
 
@@ -132,8 +154,8 @@ export class SpectrumAnalyzer {
 
     console.log('')
 
-    const N = params.fftResolution
-    const L = params.size
+    const N = grid.fftResolution
+    const L = grid.size
     const kNyquist = (Math.PI * N) / L
 
     console.log('========== RADIAL ENERGY DENSITY ==========')

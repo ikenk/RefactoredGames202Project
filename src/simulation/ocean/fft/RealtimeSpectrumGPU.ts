@@ -5,6 +5,7 @@ import { InitialSpectrum } from './InitialSpectrum'
 import { FullScreenQuad } from '@/objects/FullScreenQuad'
 import { ComplexBuffer } from './ComplexBuffer'
 import { TextureCreationError } from '@/errors/EngineError/TextureError/TextureCreationError'
+import { FFTSpectrumEvolutionConfig } from './types/FFTSpectrumEvolutionConfig'
 
 /**
  * GPU 实时频谱演化器
@@ -37,15 +38,19 @@ export class RealtimeSpectrumGPU {
 
   constructor(
     gl: WebGLRenderingContext,
-    params: OceanParams,
+    // params: OceanParams,
+    config: FFTSpectrumEvolutionConfig,
     initialSpectrum: InitialSpectrum,
     fullScreenQuad: FullScreenQuad,
     shader: Shader
   ) {
     this.gl = gl
-    this.N = params.fftResolution
-    this.L = params.size
-    this.gravity = params.gravity
+    // this.N = params.fftResolution
+    // this.L = params.size
+    // this.gravity = params.gravity
+    this.N = config.fftResolution
+    this.L = config.size
+    this.gravity = config.gravity
     this.fullScreenQuad = fullScreenQuad
     this.shader = shader
 
@@ -67,7 +72,15 @@ export class RealtimeSpectrumGPU {
       }
     })
 
-    this.fullScreenQuad.createVBOs(gl)
+    // ❌ 删掉这一行：
+    // 原因：fullScreenQuad 是【外部传入、外部持有】的共享对象，
+    //      它的 VBO 已经由 FFTOceanComputePass.create() 建好。
+    //      这里再调一次会创建一套新 VBO 并直接覆盖 Mesh.vbos 里的引用，
+    //      旧的那套永远删不掉。而 addLayer() 每层调用一次本构造函数，
+    //      N 层 cascade 就泄漏 N 套 VBO。
+    // this.fullScreenQuad.createVBOs(gl)
+
+    // 保留：为本 pass 的 shader 预录制 VAO（与其它两个 shader 各自独立）
     this.fullScreenQuad.cacheAttriLocations(shader)
   }
 
@@ -91,7 +104,8 @@ export class RealtimeSpectrumGPU {
     this.shader.set1f('uN', this.N)
     this.shader.set1f('uHalfN', this.N * 0.5)
 
-    this.fullScreenQuad.bind(gl)
+    // this.fullScreenQuad.bind(gl)
+    this.fullScreenQuad.bind(this.shader)
     gl.drawElements(gl.TRIANGLES, this.fullScreenQuad.count, this.fullScreenQuad.indexData!.type, 0)
 
     return [

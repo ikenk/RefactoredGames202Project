@@ -1,21 +1,18 @@
-// import { CascadeLayerParams } from '@/managers/fftOcean/types/fftOcean'
-import { OceanParams } from '../fft/types/OceanParams'
-
-// export interface Spectrum {
-//   calculateH0Magnitude(kx: number, kz: number, params: CascadeLayerParams): number
-// }
+import type { SpectrumEvaluationContext } from './types/SpectrumEvaluationContext'
 
 /**
- * 波谱接口
+ * 波谱模型的统一求值接口。
  *
- * 所有波谱模型（Phillips、JONSWAP、Capillary 等）的统一接口。
- * 由 InitialSpectrum 在生成 h₀(k) 时调用。
- *
- * @param kx - 波向量 x 分量 (rad/m)
- * @param kz - 波向量 z 分量 (rad/m)
- * @param params - 海洋参数
- * @returns h₀ 的幅度 |h₀(k)|，不含随机相位
+ * 模型专属配置在 Spectrum 创建时提供；当前层共享的物理环境在求值时提供。
  */
 export interface Spectrum {
-  calculateH0Magnitude(kx: number, kz: number, params: OceanParams): number
+  /**
+   * 计算离散初始频谱 h0(k) 的幅度。
+   *
+   * @param kx 波向量 X 分量，单位 rad/m。
+   * @param kz 波向量 Z 分量，单位 rad/m。
+   * @param context 当前 cascade 层共享的求值环境。
+   * @returns 不包含随机相位的 h0 幅度。
+   */
+  calculateH0Magnitude(kx: number, kz: number, context: SpectrumEvaluationContext): number
 }

@@ -1,5 +1,8 @@
 import { Spectrum } from '../spectrums/Spectrum'
+import { SpectrumEvaluationContext } from '../spectrums/types/SpectrumEvaluationContext'
 import { ComplexBuffer } from './ComplexBuffer'
+import { FFTGridConfig } from './types/FFTGridConfig'
+import { InitialSpectrumConfig } from './types/InitialSpectrumConfig'
 import { OceanParams } from './types/OceanParams'
 
 /**
@@ -14,36 +17,77 @@ export class InitialSpectrum {
   private readonly N: number
   private readonly L: number
 
-  constructor(params: OceanParams, spectrum: Spectrum) {
-    this.N = params.fftResolution
-    this.L = params.size
+  constructor(
+    // params: OceanParams,
+    // spectrum: Spectrum
+    grid: FFTGridConfig,
+    config: InitialSpectrumConfig,
+    context: SpectrumEvaluationContext,
+    spectrum: Spectrum
+  ) {
+    // this.N = params.fftResolution
+    // this.L = params.size
+    this.N = grid.fftResolution
+    this.L = grid.size
 
     this.h0 = new ComplexBuffer(this.N)
     this.h0Conj = new ComplexBuffer(this.N)
 
-    this.generate(params, spectrum)
+    // this.generate(params, spectrum)
+    this.generate(config, context, spectrum)
     this.buildConjugate()
   }
 
-  private generate(params: OceanParams, spectrum: Spectrum): void {
+  // private generate(params: OceanParams, spectrum: Spectrum): void {
+  //   const N = this.N
+  //   const half = N / 2
+  //   // 全局 amplitude，作为最终缩放作用在每层的 h0 上
+  //   const globalScale = params.amplitude ?? 1.0
+
+  //   for (let n = 0; n < N; n++) {
+  //     for (let m = 0; m < N; m++) {
+  //       // DC 分量 = 0（ComplexBuffer 构造时已全零，直接跳过）
+  //       if (n === 0 && m === 0) continue
+
+  //       // kx 对应 Texture Y 轴，kz 对应 Texture X 轴（详见 Debug-Claude.md）
+  //       // const kx = this.waveNumber(n)
+  //       // const kz = this.waveNumber(m)
+
+  //       // kx 对应 Texture X 轴，kz 对应 Texture Y 轴（详见 Debug-Claude.md）
+  //       const kx = this.waveNumber(m)
+  //       const kz = this.waveNumber(n)
+  //       const h0Mag = spectrum.calculateH0Magnitude(kx, kz, params) * globalScale
+
+  //       const factor = h0Mag / Math.sqrt(2)
+
+  //       const xi_r = InitialSpectrum.gaussianRandom()
+  //       const xi_i = InitialSpectrum.gaussianRandom()
+
+  //       const isNyquist =
+  //         (n === 0 && m === half) || (n === half && m === 0) || (n === half && m === half)
+
+  //       this.h0.set(n, m, factor * xi_r, isNyquist ? 0 : factor * xi_i)
+  //     }
+  //   }
+  // }
+
+  private generate(
+    config: InitialSpectrumConfig,
+    context: SpectrumEvaluationContext,
+    spectrum: Spectrum
+  ): void {
     const N = this.N
     const half = N / 2
-    // 全局 amplitude，作为最终缩放作用在每层的 h0 上
-    const globalScale = params.amplitude ?? 1.0
+    const globalScale = config.amplitude ?? 1.0
 
     for (let n = 0; n < N; n++) {
       for (let m = 0; m < N; m++) {
-        // DC 分量 = 0（ComplexBuffer 构造时已全零，直接跳过）
         if (n === 0 && m === 0) continue
 
-        // kx 对应 Texture Y 轴，kz 对应 Texture X 轴（详见 Debug-Claude.md）
-        // const kx = this.waveNumber(n)
-        // const kz = this.waveNumber(m)
-
-        // kx 对应 Texture X 轴，kz 对应 Texture Y 轴（详见 Debug-Claude.md）
         const kx = this.waveNumber(m)
         const kz = this.waveNumber(n)
-        const h0Mag = spectrum.calculateH0Magnitude(kx, kz, params) * globalScale
+
+        const h0Mag = spectrum.calculateH0Magnitude(kx, kz, context) * globalScale
 
         const factor = h0Mag / Math.sqrt(2)
 
