@@ -1,70 +1,111 @@
 import js from '@eslint/js'
+import html from '@html-eslint/eslint-plugin'
+import importPlugin from 'eslint-plugin-import'
+import markdown from 'eslint-plugin-markdown'
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
-import markdown from 'eslint-plugin-markdown'
-import importPlugin from 'eslint-plugin-import'
-import html from '@html-eslint/eslint-plugin'
+
+const javascriptAndTypeScriptFiles = ['**/*.{js,mjs,cjs,ts,mts,cts}']
+
+const typeScriptFiles = ['**/*.{ts,mts,cts}']
+
+const isProductionLint = process.env.LINT_MODE === 'production'
+
+/**
+ * typescript-eslint 的推荐配置没有统一限定 files。
+ *
+ * 这里将每一项都限制到 TypeScript 文件，避免这些配置错误地作用于
+ * HTML、Markdown 等非 TypeScript 文件。
+ */
+const typeScriptRecommendedConfigs = tseslint.configs.recommended.map((config) => ({
+  ...config,
+  files: typeScriptFiles
+}))
 
 export default [
-  // ==========================================
-  // Global
-  // ==========================================
+  // ============================================================
+  // 全局忽略
+  // ============================================================
 
-  // ==================== 忽略目录（等价于 ignorePatterns）====================
   {
+    name: 'project/ignores',
+
     ignores: [
       '.claude/**',
+      'codex-*/**',
+      'claude-*/**',
+
+      '**/node_modules/**',
       '**/dist/**',
       '**/dist-ssr/**',
       '**/coverage/**',
-      '**/node_modules/**',
+      '**/.vite/**',
+
+      // 静态资源不属于 ESLint 检查范围
+      'public/**',
+
+      // C++ 作业及其生成目录不属于当前 TypeScript 工程
+      'prt/**',
+      'lut-gen/**',
+
+      // 历史参考文件
+      'reference/**',
+
+      // 当前不进入正式检查链路的调试、废弃实现
+      'src/debug/**',
+      'src/**/deprecated/**',
+      'src/**/*-deprecated.ts',
+      'src/**/*-deprecated.d.ts',
+      'src/**/*Deprecated*/**',
+
       '**/*.min.js'
     ]
   },
 
-  // ==================== Third Party cCnfig ====================
-  // JS 推荐规则（等价于 eslint:recommended）
-  js.configs.recommended,
-  // TypeScript 配置
-  ...tseslint.configs.recommended,
+  // ============================================================
+  // JavaScript / TypeScript 推荐规则
+  // ============================================================
 
-  // Customed Config
   {
+    ...js.configs.recommended,
+
+    name: 'project/javascript-recommended',
+    files: javascriptAndTypeScriptFiles
+  },
+
+  ...typeScriptRecommendedConfigs,
+
+  // ============================================================
+  // JS / TS 通用代码质量规则
+  // ============================================================
+
+  {
+    name: 'project/code',
+
+    files: javascriptAndTypeScriptFiles,
+
     languageOptions: {
-      parser: tseslint.parser,
-      parserOptions: {
-        ecmaVersion: 2020,
-        sourceType: 'module'
-      },
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+
       globals: {
-        ...globals.browser,
-        ...globals.node,
-        ...globals.es2020
+        ...globals.es2022
       }
     },
 
     plugins: {
-      import: importPlugin,
-      '@typescript-eslint': tseslint.plugin
-      // markdown: markdown,
-    },
-
-    settings: {
-      'import/resolver': {
-        alias: {
-          map: [['@', './src']],
-          extensions: ['.ts', '.js', '.json', '.d.ts']
-        }
-      }
+      import: importPlugin
     },
 
     rules: {
-      // prettier format
-      'no-console': 'warn',
-      semi: ['error', 'never'],
-      quotes: ['error', 'single'],
+      'no-console': 'off',
       'prefer-const': 'warn',
-      // 强制注释符号后必须有空格
+
+      /**
+       * Prettier 不会替你修改注释内容，
+       * 因此 spaced-comment 仍然属于 ESLint 职责。
+       */
       'spaced-comment': [
         'error',
         'always',
@@ -80,19 +121,37 @@ export default [
           }
         }
       ],
-      // typescript
+
+      /**
+       * 禁止导出可重新赋值的 let 绑定。
+       */
+      'import/no-mutable-exports': 'error'
+    }
+  },
+
+  // ============================================================
+  // TypeScript 通用规则
+  // ============================================================
+
+  {
+    name: 'project/typescript',
+
+    files: typeScriptFiles,
+
+    rules: {
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_'
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_'
         }
       ],
+
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
 
-      // 命名约定
       '@typescript-eslint/naming-convention': [
         'warn',
         {
@@ -103,37 +162,40 @@ export default [
           selector: 'typeAlias',
           format: ['PascalCase']
         }
-      ],
-      // import plugin
-      // 禁止导出 let 声明的变量，解决 ESModule 的符号绑定(Live Binding)问题
-      'import/no-mutable-exports': 'error'
+      ]
     }
   },
 
-  // ==========================================
-  // Local
-  // ==========================================
+  // ============================================================
+  // 正式源码：浏览器环境 + 类型感知规则
+  // ============================================================
 
-  // ==================== src ====================
   {
+    name: 'project/source',
+
     files: ['src/**/*.ts'],
+
     ignores: [
-      '**/*.test.ts', // 排除测试文件
-      '**/*.spec.ts', // 排除测试文件
-      '**/*.md/**', // 排除 Markdown 虚拟文件
-      '**/*.md/*.ts' // 排除 Markdown 虚拟文件
+      'src/**/*.test.ts',
+      'src/**/*.spec.ts',
+
+      // Markdown processor 产生的虚拟 TS 文件不能加入正式 tsconfig
+      '**/*.md/*.ts'
     ],
+
     languageOptions: {
+      globals: {
+        ...globals.browser
+      },
+
       parserOptions: {
-        project: './tsconfig.app.json' // 源代码用 app 配置
+        project: './tsconfig.json',
+        tsconfigRootDir: import.meta.dirname
       }
     },
-    rules: {
-      // ==========================================
-      // 需要类型信息的规则(更严格)
-      // ==========================================
 
-      // Promise 相关
+    rules: {
+      // Promise
       '@typescript-eslint/await-thenable': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
@@ -147,84 +209,244 @@ export default [
       '@typescript-eslint/no-unsafe-member-access': 'warn',
       '@typescript-eslint/no-unsafe-return': 'error',
 
-      // 代码质量
+      // 可读性
       '@typescript-eslint/prefer-nullish-coalescing': 'warn',
       '@typescript-eslint/prefer-optional-chain': 'warn',
-      '@typescript-eslint/strict-boolean-expressions': 'off' // 可能太严格
+
+      /**
+       * 对当前渲染代码过于严格，暂时关闭。
+       */
+      '@typescript-eslint/strict-boolean-expressions': 'off'
     }
   },
 
-  // ==================== test ====================
   {
-    files: ['tests/**/*.ts', 'src/**/*.{test,spec}.ts'],
+    name: 'project/production-console-policy',
+
+    files: ['src/**/*.ts'],
+
+    rules: {
+      /**
+       * 开发检查：所有 console 都允许。
+       *
+       * 生产检查：
+       * - console.warn / console.error 允许；
+       * - console.log / debug / info 报错。
+       */
+      'no-console': isProductionLint
+        ? [
+            'error',
+            {
+              allow: ['warn', 'error']
+            }
+          ]
+        : 'off'
+    }
+  },
+
+  {
+    name: 'project/production-console-relaxed-modules',
+
+    files: [
+      'src/loaders/**/*.ts',
+      'src/textures/**/loaders/**/*.ts',
+      'src/monitors/**/*.ts',
+      'src/simulation/**/analysis/**/*.ts'
+    ],
+
+    rules: {
+      /**
+       * 资源加载进度、GPU 信息、FFT 分析结果属于这些模块的职责。
+       */
+      'no-console': 'off'
+    }
+  },
+
+  // ============================================================
+  // 所有测试
+  // ============================================================
+
+  {
+    name: 'project/tests',
+
+    files: ['tests/**/*.ts'],
+
     languageOptions: {
+      globals: {
+        ...globals.vitest
+      },
+
       parserOptions: {
-        project: './tsconfig.test.json' // 测试用 test 配置
+        project: './tsconfig.test.json',
+        tsconfigRootDir: import.meta.dirname
       }
     },
+
     rules: {
-      // 测试文件允许的宽松规则
+      /**
+       * 测试中有时需要构造不完整对象、错误输入和 mock，
+       * 因此适当放宽 unsafe/any 规则。
+       */
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
 
-      // 测试中的 expect 语句
+      /**
+       * Vitest 的 expect 调用和测试回调不按照业务 Promise
+       * 的方式检查。
+       */
       '@typescript-eslint/no-floating-promises': 'off'
     }
   },
 
-  // ==================== config ====================
+  // Node 单元测试、集成测试
   {
-    files: ['*.config.ts', '*.config.*.ts', 'scripts/**/*.ts'],
+    name: 'project/node-tests',
+
+    files: ['tests/unit/**/*.ts', 'tests/integration/**/*.ts'],
+
     languageOptions: {
+      globals: {
+        ...globals.node
+      }
+    }
+  },
+
+  // Chromium 浏览器测试、E2E
+  {
+    name: 'project/browser-tests',
+
+    files: ['tests/browser/**/*.ts', 'tests/e2e/**/*.ts'],
+
+    languageOptions: {
+      globals: {
+        ...globals.browser
+      }
+    }
+  },
+
+  // ============================================================
+  // Node 配置文件
+  // ============================================================
+
+  {
+    name: 'project/typescript-config-files',
+
+    files: ['vite.config.ts', 'vitest.config.ts'],
+
+    languageOptions: {
+      globals: {
+        ...globals.node
+      },
+
       parserOptions: {
-        project: './tsconfig.node.json' // 配置用 node 配置
+        project: './tsconfig.node.json',
+        tsconfigRootDir: import.meta.dirname
       }
     },
+
     rules: {
-      // 配置文件可以使用 console
       'no-console': 'off'
     }
   },
 
-  // ==================== Markdown ====================
   {
-    files: ['**/*.md'],
-    processor: markdown.processors.markdown
-  },
-  // Markdown 中的代码块
-  {
-    files: ['**/*.md/*.ts', '**/*.md/*.js'], // Markdown processor 生成的虚拟文件
+    name: 'project/javascript-config-files',
+
+    files: ['*.config.js'],
+
     languageOptions: {
-      parser: tseslint.parser,
-      parserOptions: {
-        ecmaVersion: 2020,
-        sourceType: 'module'
-        // ✅ 不设置 project
+      globals: {
+        ...globals.node
       }
     },
+
     rules: {
-      // Markdown 中的示例代码可以放宽规则
-      'no-console': 'off',
-      'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      'import/no-unresolved': 'off', // 示例代码可能导入不存在的模块
-      '@typescript-eslint/no-floating-promises': 'off', // ✅ 关闭需要类型信息的规则
-      '@typescript-eslint/await-thenable': 'off'
+      'no-console': 'off'
     }
   },
 
-  // ==================== HTML 文件 ====================
   {
-    files: ['**/*.html', '**/*.htm'],
-    plugins: {
-      html: html
+    name: 'project/node-scripts',
+
+    files: ['scripts/**/*.{js,mjs,cjs}'],
+
+    languageOptions: {
+      globals: {
+        ...globals.node
+      }
     },
+
+    rules: {
+      'no-console': 'off'
+    }
+  },
+
+  // ============================================================
+  // Markdown 代码块
+  // ============================================================
+
+  {
+    name: 'project/markdown',
+
+    files: ['**/*.md'],
+    processor: markdown.processors.markdown
+  },
+
+  {
+    name: 'project/markdown-code-blocks',
+
+    files: ['**/*.md/*.{js,ts}'],
+
+    rules: {
+      'no-console': 'off',
+      'no-unused-vars': 'off',
+
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/await-thenable': 'off',
+
+      /**
+       * 文档示例可能故意引用尚未安装或仅用于说明的模块。
+       */
+      'import/no-unresolved': 'off'
+    }
+  },
+
+  // ============================================================
+  // HTML
+  // ============================================================
+
+  {
+    name: 'project/html',
+
+    files: ['**/*.html', '**/*.htm'],
+
+    plugins: {
+      html
+    },
+
     language: 'html/html',
+
     rules: {
       'html/no-duplicate-class': 'error'
     }
-  }
+  },
+
+  // ============================================================
+  // 必须放在最后
+  // ============================================================
+
+  /**
+   * 它同时完成三件事：
+   *
+   * 1. 注册 eslint-plugin-prettier；
+   * 2. 启用 prettier/prettier；
+   * 3. 使用 eslint-config-prettier 关闭冲突格式规则。
+   *
+   * 这里不能再在后面重新开启 semi、quotes 等 ESLint 格式规则。
+   */
+  eslintPluginPrettierRecommended
 ]

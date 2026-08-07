@@ -55,7 +55,7 @@ export const CAVE_SCENE_CONFIG_GBUFFER: CaveSceneConfig = {
   },
   modelConfigs: [
     {
-      path: 'assets/hw3/cave/',
+      path: ModelPaths.HW3_CAVE,
       name: 'cave',
       format: 'gltf',
       vertShaderPath: ShaderPaths.GBUFFER_VERTEX,

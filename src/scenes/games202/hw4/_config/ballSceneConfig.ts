@@ -5,25 +5,40 @@ import { CubeMapImagesConfig } from '@/loaders/types/loadCubeMapImages'
 import { ModelPaths } from '@/models/_config/modelPaths'
 import { hw4Light } from '@/lights/directionalLight/_presets/hw4Lights'
 import { Vec3 } from '@/math/types/math'
+import { TexturePaths } from '@/textures/_config/texturePaths'
 
 // ============================================================
 //  LUT 纹理路径
 // ============================================================
 
+// export const LUT_PATHS = {
+//   BALL_GGX_E_LUT: 'assets/hw4/ball/GGX_E_LUT.png',
+//   BALL_GGX_E_MC_LUT: 'assets/hw4/ball/GGX_E_MC_LUT.png',
+//   BALL_GGX_Eavg_LUT: 'assets/hw4/ball/GGX_Eavg_LUT.png',
+//   SPHERE_GGX_E_LUT: 'assets/hw4/sphere/GGX_E_LUT.png',
+//   SPHERE_GGX_Eavg_LUT: 'assets/hw4/sphere/GGX_Eavg_LUT.png'
+// }
+
 export const LUT_PATHS = {
-  BALL_GGX_E_LUT: 'assets/hw4/ball/GGX_E_LUT.png',
-  BALL_GGX_E_MC_LUT: 'assets/hw4/ball/GGX_E_MC_LUT.png',
-  BALL_GGX_Eavg_LUT: 'assets/hw4/ball/GGX_Eavg_LUT.png',
-  SPHERE_GGX_E_LUT: 'assets/hw4/sphere/GGX_E_LUT.png',
-  SPHERE_GGX_Eavg_LUT: 'assets/hw4/sphere/GGX_Eavg_LUT.png'
-}
+  BALL_GGX_E_LUT: TexturePaths.HW4_BALL_GGX_E_LUT,
+  BALL_GGX_E_MC_LUT: TexturePaths.HW4_BALL_GGX_E_MC_LUT,
+  BALL_GGX_Eavg_LUT: TexturePaths.HW4_BALL_GGX_EAVG_LUT,
+  SPHERE_GGX_E_LUT: TexturePaths.HW4_SPHERE_GGX_E_LUT,
+  SPHERE_GGX_Eavg_LUT: TexturePaths.HW4_SPHERE_GGX_EAVG_LUT
+} as const
 
 // ============================================================
 //  CubeMap 环境贴图路径
 // ============================================================
 
+// export const CORNELL_BOX_CUBEMAP: CubeMapImagesConfig = {
+//   basePath: 'assets/hw4/cubemap/CornellBox/',
+//   extension: '.jpg',
+//   faceKeys: ['posx', 'negx', 'posy', 'negy', 'posz', 'negz']
+// }
+
 export const CORNELL_BOX_CUBEMAP: CubeMapImagesConfig = {
-  basePath: 'assets/hw4/cubemap/CornellBox/',
+  basePath: TexturePaths.HW4_CUBEMAP_CORNELL_BOX,
   extension: '.jpg',
   faceKeys: ['posx', 'negx', 'posy', 'negy', 'posz', 'negz']
 }

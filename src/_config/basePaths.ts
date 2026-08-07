@@ -11,8 +11,10 @@ import urlJoin from 'url-join'
 // ========== 基础路径 ==========
 
 /**
- * 应用基础路径
- * 来源：vite.config.ts 的 base 配置
+ * 所有静态资源都部署在当前应用的同一站点下。
+ *
+ * BASE_URL 由 Vite 的 base 生成，例如生产环境为 /aimimi-engine/。
+ * VITE_*_BASE 是不以 / 开头、但以 / 结尾的相对目录片段。
  */
 export const BASE_URL = import.meta.env.BASE_URL
 
@@ -21,7 +23,7 @@ export const BASES = {
   textures: urlJoin(BASE_URL, import.meta.env.VITE_TEXTURE_BASE),
   models: urlJoin(BASE_URL, import.meta.env.VITE_MODEL_BASE),
   prtSHTxt: urlJoin(BASE_URL, import.meta.env.VITE_PRT_SH_BASE)
-}
+} as const
 
 /**
  * 模型基础路径

@@ -1,13 +1,9 @@
-# .github/workflows/deploy.yaml
 name: Deploy to GitHub Pages
 
-# 手动触发部署，或者推送到 main 分支且提交信息包含 [deploy]
 on:
-  workflow_dispatch: # 允许手动触发
+  workflow_dispatch:
   push:
     branches: [main]
-    # 只有提交信息包含 [deploy] 才自动部署
-    # 例如: git commit -m "feat: 添加新功能 [deploy]"
 
 permissions:
   contents: read
@@ -15,74 +11,38 @@ permissions:
   id-token: write
 
 jobs:
-  # 先运行代码检查
-  code-quality:
-    name: 🔍 代码质量检查
+  deploy:
+    name: Build and deploy
     runs-on: ubuntu-latest
-
-    steps:
-      - name: 📥 检出代码
-        uses: actions/checkout@v4
-
-      - name: 📦 设置 Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: 📋 安装依赖
-        run: npm ci
-
-      - name: 🔧 TypeScript 类型检查
-        run: npm run type-check
-
-      - name: 🧹 ESLint 代码检查
-        run: npm run lint
-
-      - name: 💄 Prettier 格式检查
-        run: npm run format:check
-
-  # 构建和部署
-  build-and-deploy:
-    name: 🚀 构建并部署
-    runs-on: ubuntu-latest
-    needs: code-quality
 
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: 📥 检出代码
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 📦 设置 Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: '22.23.1'
+          cache: npm
 
-      - name: 📋 安装依赖
+      - name: Install dependencies
         run: npm ci
 
-      - name: 🔨 构建项目
-        run: npm run build
+      - name: Check and build
+        run: npm run check
 
-      - name: 🔧 配置 GitHub Pages
+      - name: Configure GitHub Pages
         uses: actions/configure-pages@v4
 
-      - name: 📤 上传构建产物
+      - name: Upload build artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
 
-      - name: 🚀 部署到 GitHub Pages
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: 📝 部署成功通知
-        run: |
-          echo "## 🎉 部署成功！" >> $GITHUB_STEP_SUMMARY
-          echo "- 🌐 网站地址: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
-          echo "- 📅 部署时间: $(date)" >> $GITHUB_STEP_SUMMARY
-          echo "- 📝 提交: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY

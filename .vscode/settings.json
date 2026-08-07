@@ -3,14 +3,26 @@
   "explorer.fileNesting.patterns": {
     "tsconfig.json": "tsconfig.*.json, env.d.ts",
     "vite.config.*": "jsconfig*, vitest.*, cypress.config.*, playwright.config.*, legacy.config.ts",
-    "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .prettier*, prettier*, .editorconfig,.stylelintrc.ts,postcss.config.cjs, commitlint*",
+    "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .prettier*, prettier*, .editorconfig,.stylelintrc.ts,postcss.config.cjs, commitlint*, .nvmrc",
     ".env": ".env.*",
     ".gitignore": ".gitattributes, .gitmodules, .gitmessage, .mailmap"
   },
+  "cmake.sourceDirectory": "/Users/zhanghaoting/code-projects/Games/Games202/Homework/refactored-games202-project/lut-gen",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
+  "eslint.quiet": false,
+  "eslint.run": "onType",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
   "[glsl]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
   },
-  "cmake.sourceDirectory": "/Users/zhanghaoting/code-projects/Games/Games202/Homework/refactored-games202-project/lut-gen"
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

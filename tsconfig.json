@@ -1,60 +1,33 @@
 {
-  // ==========================================
-  // 项目引用配置
-  // ==========================================
-
-  // files: [] 表示这个配置文件本身不直接编译任何文件
-  // 所有文件的编译由 references 引用的子配置负责
-  "files": [],
-
-  // ==========================================
-  // 全局编译选项(所有子配置都会继承)
-  // ==========================================
   "compilerOptions": {
-    // 选项“baseUrl”已弃用，并将停止在 TypeScript 7.0 中运行。指定 compilerOption“ignoreDeprecations”:“6.0”以使此错误静音。
-    // 请访问 https://aka.ms/ts6 以获取迁移信息。
-    "ignoreDeprecations": "6.0",
-    /* 语言与环境 */
-    "target": "ES2020", // 目标 JS 版本 (Node 20+ 支持)
-    "lib": ["ES2020"], // 标准库 (不包含 DOM)
-    // module: "NodeNext" → 根据 package.json "type" 字段决定!
-    // 如果 "type": "module" → 输出 ESM
-    // 如果 "type": "commonjs" → 输出 CommonJS
-    "module": "es2020", // 模块系统 (支持 ESM 和 CJS) - 输出什么格式
-    "moduleResolution": "bundler", // 模块解析策略 - 如何找模块
-
-    /* 类型检查 */
-    "strict": true, // 启用所有严格类型检查
-    "noUncheckedIndexedAccess": true, // 数组索引访问可能是 undefined
-    "noImplicitOverride": true, // 必须显式声明 override
-    "esModuleInterop": true, // 兼容 CommonJS 导入, 作用: 允许 import fs from 'fs' (而不是 import * as fs)
-    "skipLibCheck": true, // 跳过 .d.ts 文件检查 (提升性能)
-    /* 输出 */
-    "declaration": true, // 生成 .d.ts 类型定义文件
-    "declarationMap": true, // 生成 .d.ts.map (便于调试)
-    "sourceMap": true, // 生成 .js.map (便于调试)
-    "removeComments": true, // 移除注释 (减小体积)
-    /* 互操作性 */
-    "allowSyntheticDefaultImports": true, // 允许默认导入没有默认导出的模块
-    "forceConsistentCasingInFileNames": true, // 强制文件名大小写一致
-    "resolveJsonModule": true, // 允许导入 .json 文件
-
-    /* 路径映射相关 */
-    // "." 表示 tsconfig.json 所在目录
-    "baseUrl": ".",
-    // 路径别名配置，让 import '@/components/Button' 能正确解析
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["vite/client"],
     "paths": {
-      "@/*": ["./src/*"] // @ 映射到 src 目录
+      "@/*": ["./src/*"]
     }
-    // "types": ["@types/webgl2"]
   },
-  // references: 引用其他 TypeScript 项目配置
-  // 这实现了"项目引用"功能,让不同环境的代码使用不同的配置
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" },
-    { "path": "./tsconfig.test.json" }
-  ],
-  // 默认排除的文件
-  "exclude": [".claude/**", "**/node_modules", "**/dist", "**/build"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "exclude": [
+    "src/debug/**",
+    "src/**/deprecated/**",
+    "src/**/*-deprecated.ts",
+    "src/**/*-deprecated.d.ts",
+    "src/**/*Deprecated*/**",
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts"
+  ]
 }

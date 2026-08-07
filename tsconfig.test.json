@@ -1,42 +1,8 @@
-// ========== tsconfig.test.json ==========
 {
   "extends": "./tsconfig.json",
-
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.{test,spec}.ts", // 源文件中的测试
-    "tests/**/*", // tests 目录
-    "vitest.unit.config.ts" // Vitest 配置文件
-  ],
-
   "compilerOptions": {
-    "composite": true,
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
-
-    // ==========================================
-    // 测试环境特定配置
-    // ==========================================
-
-    /* 环境 */
-    "lib": [
-      "ES2020",
-      "DOM", // ✅ Vitest 在 jsdom 环境运行
-      "DOM.Iterable"
-    ],
-
-    /* 类型声明 */
-    "types": [
-      "vitest/globals", // ✅ describe, it, expect 等全局函数
-      "@types/node" // ✅ Node.js API (如果测试中用到)
-    ],
-
-    /* 输出 */
-    "noEmit": true,
-    "sourceMap": true,
-
-    /* Vite/Vitest 特定 */
-    "allowImportingTsExtensions": true,
-    "moduleDetection": "force",
-    "resolveJsonModule": true
-  }
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client", "vitest/globals"]
+  },
+  "include": ["tests/**/*.ts"]
 }

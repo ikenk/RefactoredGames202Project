@@ -4,20 +4,36 @@ import { SH_ORDER2_LAYOUT } from '@/objects/prt/sphericalHarmonics/_config/shAtt
 import { SH_ORDER2_LIGHT_LAYOUT } from '@/materials/prt/_config/shLightUniformLayouts'
 import { Transform } from '@/objects/utils/Transform'
 import { PRTScenePreset } from '../types/PRTScenePreset'
+import { PRTDataDirectories } from '@/loaders/_config/prtDataPaths'
+import { TexturePaths } from '@/textures/_config/texturePaths'
+
+// const ENV_SHDATA_PATH = {
+//   INDOOR: 'assets/hw2/SHData/Indoor',
+//   CORNELL_BOX: 'assets/hw2/SHData/CornellBox',
+//   GRACECATHEDRAL: 'assets/hw2/SHData/GraceCathedral',
+//   SKYBOX: 'assets/hw2/SHData/Skybox'
+// }
+
+// const ENV_TEXTURE_PATH = {
+//   INDOOR: 'assets/hw2/cubemap/Indoor',
+//   CORNELL_BOX: 'assets/hw2/cubemap/CornellBox',
+//   GRACECATHEDRAL: 'assets/hw2/cubemap/GraceCathedral',
+//   SKYBOX: 'assets/hw2/cubemap/Skybox'
+// }
 
 const ENV_SHDATA_PATH = {
-  INDOOR: 'assets/hw2/SHData/Indoor',
-  CORNELL_BOX: 'assets/hw2/SHData/CornellBox',
-  GRACECATHEDRAL: 'assets/hw2/SHData/GraceCathedral',
-  SKYBOX: 'assets/hw2/SHData/Skybox'
-}
+  INDOOR: PRTDataDirectories.INDOOR,
+  CORNELL_BOX: PRTDataDirectories.CORNELL_BOX,
+  GRACECATHEDRAL: PRTDataDirectories.GRACE_CATHEDRAL,
+  SKYBOX: PRTDataDirectories.SKYBOX
+} as const
 
 const ENV_TEXTURE_PATH = {
-  INDOOR: 'assets/hw2/cubemap/Indoor',
-  CORNELL_BOX: 'assets/hw2/cubemap/CornellBox',
-  GRACECATHEDRAL: 'assets/hw2/cubemap/GraceCathedral',
-  SKYBOX: 'assets/hw2/cubemap/Skybox'
-}
+  INDOOR: TexturePaths.HW2_CUBEMAP_INDOOR,
+  CORNELL_BOX: TexturePaths.HW2_CUBEMAP_CORNELL_BOX,
+  GRACECATHEDRAL: TexturePaths.HW2_CUBEMAP_GRACE_CATHEDRAL,
+  SKYBOX: TexturePaths.HW2_CUBEMAP_SKYBOX
+} as const
 
 // ── 预设列表（GUI dropdown 的数据源）──
 
