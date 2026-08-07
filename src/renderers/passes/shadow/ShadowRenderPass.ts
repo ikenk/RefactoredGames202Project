@@ -347,11 +347,33 @@ export class ShadowRenderPass implements RenderPass {
   // ============================================================
   //  清理
   // ============================================================
+  // dispose(): void {
+  //   this.shadowPass?.dispose()
+  //   this.shadowMapFBO?.dispose()
+  //   this.shadowPass = null
+  //   this.shadowMapFBO = null
+  //   this.shadowCasterLightId = null
+  // }
+  /**
+   * 释放本 pass 自己创建的 GPU 资源
+   *
+   * 👉 所有权约定：
+   * - shadowPass / shadowMapFBO 由本类创建 → 由本类释放
+   * - casters / receivers 只是**外部 renderer 的引用**，本类没有创建它们，因此不释放，
+   *   只清空集合以断开引用（避免场景切换后仍持有已销毁对象）
+   * - 真正的释放方：forward 管线由 ForwardRenderPass 负责，deferred 管线由 GBufferRenderPass 负责
+   *
+   * ❗ 不要在这里 dispose renderer：
+   * - HW1 的 renderer 同时在 ShadowRenderPass 和 ForwardRenderPass 里，两边都释放会造成重复 dispose
+   */
   dispose(): void {
     this.shadowPass?.dispose()
     this.shadowMapFBO?.dispose()
     this.shadowPass = null
     this.shadowMapFBO = null
     this.shadowCasterLightId = null
+
+    this.casters.clear()
+    this.receivers.clear()
   }
 }

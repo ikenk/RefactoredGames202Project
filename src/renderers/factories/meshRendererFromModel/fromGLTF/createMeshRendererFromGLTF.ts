@@ -86,7 +86,9 @@ export async function createMeshRendererFromGLTF(
   const shader = await Shader.createShader(gl, vertShaderPath, fragShaderPath)
 
   // ---- Step 5: 缓存 attri & uniform location ----
-  mesh.cacheAttriLocations(shader)
+  //    与 BaseRenderer 构造函数里的调用重复。新实现下重复调用只是幂等命中 VAO 缓存，
+  //    但没有意义，删掉更清晰
+  // mesh.cacheAttriLocations(shader)
   material.cacheUniformLocations(shader)
 
   // ---- Step 6: 组装 MeshRenderer ----

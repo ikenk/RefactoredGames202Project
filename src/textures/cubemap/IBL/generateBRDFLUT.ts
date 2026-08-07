@@ -73,7 +73,8 @@ export async function generateBRDFLUT(
   shader.use()
   shader.set1i('uSampleCount', sampleCount)
 
-  fullScreenQuad.bind(gl)
+  // fullScreenQuad.bind(gl)
+  fullScreenQuad.bind(shader)
   gl.drawElements(gl.TRIANGLES, fullScreenQuad.count, fullScreenQuad.indexData!.type, 0)
 
   // 恢复 GL 状态

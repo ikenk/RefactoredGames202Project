@@ -75,7 +75,8 @@ export class LowResRenderPass implements RenderPass {
     this.blitShader.setTexture2D('uTexture', texture, 0)
 
     gl.disable(gl.DEPTH_TEST) // 关闭深度测试，让 fullScreenQuad 画在最顶层
-    this.fullScreenQuad.bind(gl)
+    // this.fullScreenQuad.bind(gl)
+    this.fullScreenQuad.bind(this.blitShader)
     gl.drawElements(gl.TRIANGLES, this.fullScreenQuad.count, this.fullScreenQuad.indexData!.type, 0)
     gl.enable(gl.DEPTH_TEST) // 恢复深度测试，恢复最初始的开启深度测试的状态
   }

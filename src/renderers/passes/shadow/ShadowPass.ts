@@ -67,7 +67,13 @@ export class ShadowPass {
       const mesh = caster.mesh
 
       // 绑定 caster 的几何数据
-      mesh.bind(gl)
+      // mesh.bind(gl)
+      // 绑定 caster 的几何数据
+      // ❗ 必须传 this.shader（shadow shader），不能沿用 caster 自己的 forward shader：
+      //    旧实现里 Mesh 只有一份 locationCache（按 forward shader 缓存），
+      //    shadow pass 却拿它来绑定，仅仅因为两边的 aVertexPosition 碰巧都是 location 0 才没出事。
+      //    一旦 shadow shader 增删 attribute 导致 location 变化，就会静默地把法线当顶点位置用。
+      mesh.bind(this.shader)
 
       // 设置 model matrix
       const modelMatrix = mesh.getModelMatrix()

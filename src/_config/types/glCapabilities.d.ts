@@ -456,4 +456,14 @@ export interface GLCapabilities {
    * - 返回 "unknown"
    */
   gpuVendor: string
+
+  /**
+   * OES_vertex_array_object 扩展对象（不是 boolean）。
+   *
+   * 与其它能力位不同，这里存的是对象本身 —— 因为 VAO 的 API
+   * (createVertexArrayOES / bindVertexArrayOES / deleteVertexArrayOES)
+   * 挂在扩展对象上，只留 boolean 会把它丢掉。
+   * null 表示不支持。
+   */
+  vertexArrayObject: OES_vertex_array_object | null
 }

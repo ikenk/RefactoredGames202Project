@@ -102,7 +102,8 @@ export class DepthMipmapPass implements RenderPass {
 
       shader.set1i('uCurLevel', lv)
 
-      this.fullScreenQuad.bind(gl)
+      // this.fullScreenQuad.bind(gl)
+      this.fullScreenQuad.bind(shader) // shader 即本 pass 的 depthShader
       gl.drawElements(
         gl.TRIANGLES,
         this.fullScreenQuad.count,

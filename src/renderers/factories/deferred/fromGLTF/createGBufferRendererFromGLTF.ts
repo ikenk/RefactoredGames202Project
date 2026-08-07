@@ -74,7 +74,9 @@ export async function createGBufferRendererFromGLTF(
   // 4. 缓存 location
   // 把 attribute 和 uniform 的 location 查询结果缓存起来，
   // 避免每帧 draw 时重复调用 gl.getAttribLocation / gl.getUniformLocation
-  mesh.cacheAttriLocations(shader)
+  //    与 BaseRenderer 构造函数里的调用重复。新实现下重复调用只是幂等命中 VAO 缓存，
+  //    但没有意义，删掉更清晰
+  // mesh.cacheAttriLocations(shader)
   material.cacheUniformLocations(shader)
 
   // ---- Step 6: 组装 MeshRenderer ----

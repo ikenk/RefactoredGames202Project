@@ -76,16 +76,16 @@ export function initCapabilities(gl: WebGLRenderingContext): GLCapabilities {
       gl.getParameter(gl.BLUE_BITS),
       gl.getParameter(gl.ALPHA_BITS)
     ] as [number, number, number, number],
-    depthBits: gl.getParameter(gl.DEPTH_BITS),
+    depthBits: gl.getParameter(gl.DEPTH_BITS) as number,
     contextAttributes: gl.getContextAttributes(),
 
     // ---- 硬件上限 ----
-    maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
-    maxVertexTextureUnits: gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS),
-    maxFragmentTextureUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
-    maxVaryingVectors: gl.getParameter(gl.MAX_VARYING_VECTORS),
-    maxVertexUniformVectors: gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS),
-    maxFragmentUniformVectors: gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS),
+    maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE) as number,
+    maxVertexTextureUnits: gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS) as number,
+    maxFragmentTextureUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS) as number,
+    maxVaryingVectors: gl.getParameter(gl.MAX_VARYING_VECTORS) as number,
+    maxVertexUniformVectors: gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS) as number,
+    maxFragmentUniformVectors: gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS) as number,
 
     // ---- 片元 highp 精度（移动端关键）----
     fragHighpSupported: (() => {
@@ -94,8 +94,10 @@ export function initCapabilities(gl: WebGLRenderingContext): GLCapabilities {
     })(),
 
     // ---- GPU 型号（排查移动端/集显问题）----
-    gpuRenderer: dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : 'unknown',
-    gpuVendor: dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) : 'unknown'
+    gpuRenderer: (dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : 'unknown') as string,
+    gpuVendor: (dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) : 'unknown') as string,
+
+    vertexArrayObject: gl.getExtension('OES_vertex_array_object')
   }
 
   console.log(`${ctx} `, _capabilities)

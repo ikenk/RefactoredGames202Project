@@ -9,6 +9,8 @@ import { MeshVBOCreationError } from '@/errors/EngineError/MeshError/MeshVBOCrea
 import { SphereGeometry } from '@/geometry/SphereGeometry'
 import { AttributeData, IndexData, TypedArrayType } from './types/Mesh'
 import { ExhaustiveMatchError } from '@/errors/LanguageError/ExhaustiveMatchError'
+import { getCapabilities } from '@/_config/glCapabilities'
+import { MeshVAOCreationError } from '@/errors/EngineError/MeshError/MeshVAOCreationError'
 
 // ============================================================
 //  Mesh 类（管理几何数据、VBO、attribute locations）
@@ -31,8 +33,28 @@ export class Mesh {
   private ibo: WebGLBuffer | null = null
 
   // Mesh 自己缓存 attribute locations
+  //   问题：它只有 (attribute 名) 一个维度，隐含假设「一个 Mesh 只被一个 program 绘制」。
+  //   而 ShadowPass.ts:70 和 FFTOceanComputePass-multi-layers-v3.ts:76-80 都违反了这个假设。
   private locationCache: Map<string, number> = new Map()
 
+  /** 每个 shader program 一个 VAO —— 补上了 program 这一维 */
+  private vaos: Map<WebGLProgram, WebGLVertexArrayObjectOES> = new Map()
+
+  /** 每个 program 一份 name → location，仅供调试查询 */
+  private locationCaches: Map<WebGLProgram, Map<string, number>> = new Map()
+
+  /**
+   * VAO 扩展。
+   * 走 glCapabilities 统一取（那里已经是「集中调 getExtension」的唯一入口），
+   * 缺失时 fail-fast —— 与 chooseIndexType 对 OES_element_index_uint 的处理一致。
+   */
+  private get vaoExt(): OES_vertex_array_object {
+    const ext = getCapabilities().vertexArrayObject
+    if (!ext) throw new WebGLExtensionError('OES_vertex_array_object')
+    return ext
+  }
+
+  // ----- constructor -----
   constructor(
     attributes: AttributeData[],
     rawIndices: number[] | Uint8Array | Uint16Array | Uint32Array | null,
@@ -72,6 +94,8 @@ export class Mesh {
     // this.name = this.constructor.name
     this.name = `${name}#${this.id}`
   }
+
+  // ----- chooseIndexType -----
   /**
    * 一个纯粹的数据转换工具
    *
@@ -96,6 +120,12 @@ export class Mesh {
           maxIndex = indices[i]!
         }
       }
+
+      // for (const index of indices) {
+      //   if (index > maxIndex) {
+      //     maxIndex = index
+      //   }
+      // }
 
       if (maxIndex < 256) {
         return { array: new Uint8Array(indices), type: gl.UNSIGNED_BYTE }
@@ -131,6 +161,10 @@ export class Mesh {
     throw new ExhaustiveMatchError(indices, 'Invalid indices type')
   }
 
+  // ============================================================
+  //  GPU 资源：VBO / IBO
+  // ============================================================
+
   /**
    * 创建 VBO（由 Mesh 负责），并写入数据
    *
@@ -139,6 +173,14 @@ export class Mesh {
    * attribute 的绑定与启用由 bind() 阶段完成。
    */
   createVBOs(gl: WebGLRenderingContext, dynamic: boolean = false): void {
+    // ELEMENT_ARRAY_BUFFER 的绑定属于「当前 VAO」的状态。
+    //   若此刻恰好绑着某个 Mesh 的 VAO，本方法末尾那句
+    //   bindBuffer(ELEMENT_ARRAY_BUFFER, null) 会把那个 VAO 的索引缓冲清成 null，
+    //   导致那个 Mesh 下次 drawElements 直接 INVALID_OPERATION。
+    //   先回到默认 VAO，所有 buffer 绑定就只会落在那张没人绘制的表上。
+    //   （ARRAY_BUFFER 的绑定不属于 VAO，不受影响。）
+    this.vaoExt.bindVertexArrayOES(null)
+
     const usage = dynamic ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW
 
     // 临时 Map：array 对象引用 → 已创建的 VBO
@@ -182,63 +224,101 @@ export class Mesh {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
   }
 
+  // ============================================================
+  //  VAO
+  // ============================================================
+
   /**
-   * 缓存 attribute locations（由 Mesh 负责）
+   * ★修改：方法名与签名保持不变（现有 10 处调用点无需改动），语义升级为
+   *        「为这个 program 预先录制一份 VAO」。
    *
-   * 仅进行 attribute 名称到 location 的映射查询，
-   * 不涉及缓冲区数据的上传或绑定。
+   * 原实现：this.locationCache.clear() 之后重填 —— 所以对同一个 Mesh 连续用不同
+   *        shader 调用时，只有最后一次的结果留得下来（v3 的三连调用就是这样）。
+   * 新实现：每个 program 各存各的，互不覆盖。
+   *
+   * 不调用也行，bind() 会在首次遇到新 program 时自动录制；
+   * 建议在加载阶段调用，避免第一帧多花那几十微秒。
    */
   cacheAttriLocations(shader: Shader): void {
-    this.locationCache.clear()
+    this.ensureVAO(shader)
+  }
 
-    for (const name of this.attributes.keys()) {
-      const location = shader.getAttribLocation(name)
-      if (location >= 0) {
-        this.locationCache.set(name, location)
-      } else {
-        console.warn(
-          new MeshLocationCacheError(
-            name,
-            `Attribute '${name}' not found in '${shader.name}' shader program`,
-            this.name,
-            {
-              shaderProgramName: shader.name
-            }
-          )
-        )
-      }
+  /**
+   * ★修改：签名 bind(gl) → bind(shader)。
+   *
+   * 原实现每帧对全局唯一的默认 VAO 执行 N 次 bindBuffer + N 次 vertexAttribPointer +
+   * N 次 enableVertexAttribArray，且只 enable 从不 disable —— 这是黑屏 bug 的根源。
+   *
+   * 新实现只做一件事：把这个 (Mesh, program) 的 VAO 设为当前 VAO。
+   *
+   * @param shader 必须与随后 useProgram 生效的那个一致。
+   *               原实现无法保证这一点：ShadowPass 用 shadowShader 绘制，
+   *               却使用按 directLightShader 缓存的 location（碰巧都是 0 才没出事）。
+   */
+  bind(shader: Shader): void {
+    this.vaoExt.bindVertexArrayOES(this.ensureVAO(shader))
+  }
+
+  /**
+   * ★新增：解绑，回到默认 VAO。建议每次 draw 之后调用。
+   *
+   * 代价是一次 GL 调用，收益是：那些绕过 Mesh 直接操作槽位的代码
+   * （drawCube.ts / convertHDRToCubeMap.ts / FFTProcessor.ts）
+   * 永远只会写到默认 VAO 上，碰不到任何 Mesh 的 VAO。
+   */
+  unbind(): void {
+    this.vaoExt.bindVertexArrayOES(null)
+  }
+
+  /** ★新增：取出（必要时录制）该 program 的 VAO */
+  private ensureVAO(shader: Shader): WebGLVertexArrayObjectOES {
+    const existing = this.vaos.get(shader.program)
+    if (existing) return existing
+    return this.recordVAO(shader)
+  }
+
+  /**
+   * ★新增：录制 VAO。
+   *
+   * bindVertexArrayOES(vao) 之后发出的 vertexAttribPointer / enableVertexAttribArray /
+   * 绑 ELEMENT_ARRAY_BUFFER，全部只写进这个 vao，对默认 VAO 和其它 VAO 零影响。
+   *
+   * ❗ 注意与 createVBOs 的差别：这里在「停止录制」之前**不会**把
+   *    ELEMENT_ARRAY_BUFFER 置 null —— 那正是要录进 VAO 的东西。
+   */
+  private recordVAO(shader: Shader): WebGLVertexArrayObjectOES {
+    const gl = this.gl
+    const ext = this.vaoExt
+
+    const vao = ext.createVertexArrayOES()
+    if (!vao) {
+      throw new MeshVAOCreationError(`Failed to create VAO for '${this.name}'`, this.name, {
+        shaderName: shader.name
+      })
     }
-  }
 
-  /**
-   * 获取 attribute location（从缓存）
-   *
-   * 配置 attribute pointer 并启用 attribute，
-   * 指定 GPU 如何解释已上传的缓冲区数据。
-   *
-   * 不会执行数据上传操作。
-   */
-  getAttriLocation(name: string): number | undefined {
-    return this.locationCache.get(name)
-  }
+    const locations = new Map<string, number>()
+    const skipped: string[] = []
 
-  /**
-   * 绑定几何数据（由 Mesh 负责）
-   */
-  bind(gl: WebGLRenderingContext) {
-    // console.debug(this.vbos.size)
-    // console.debug(this.locationCache.size)
+    ext.bindVertexArrayOES(vao) // 开始录制
 
     for (const [name, vbo] of this.vbos) {
-      const location = this.getAttriLocation(name)
-      if (location === undefined || location < 0) continue
+      const location = shader.getAttribLocation(name)
+      if (location < 0) {
+        // -1 是合法常态：mesh 带了这个 attribute 但该 shader 没声明。
+        // 例如 ball.gltf 有 aTangent，而 Cook-Torrance / Kulla-Conty 没有。
+        skipped.push(name)
+        continue
+      }
 
       const attriData = this.attributes.get(name)
       if (!attriData) {
+        ext.bindVertexArrayOES(null)
+        ext.deleteVertexArrayOES(vao)
         throw new MeshValidationError(
           'empty_attribute',
           `VBO exists for attribute '${name}' but AttributeData is missing`,
-          this.constructor.name
+          this.name
         )
       }
 
@@ -252,13 +332,138 @@ export class Mesh {
         attriData.offset ?? 0
       )
       gl.enableVertexAttribArray(location)
+      locations.set(name, location)
     }
 
-    // 绑定索引
-    if (this.ibo) {
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
+    // 索引缓冲的绑定同样是 VAO 状态，一并录进去（录完不清空，见方法头注释）
+    if (this.ibo) gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
+
+    ext.bindVertexArrayOES(null) // 停止录制
+    gl.bindBuffer(gl.ARRAY_BUFFER, null) // ARRAY_BUFFER 不属于 VAO，顺手清干净
+
+    if (locations.size === 0) {
+      // 一个都没对上 —— 基本可断定传错了 shader，属于真错误
+      console.warn(
+        new MeshLocationCacheError(
+          [...this.vbos.keys()].join(', '),
+          `No attribute of '${this.name}' matched shader '${shader.name}'. Wrong shader?`,
+          this.name,
+          { shaderProgramName: shader.name }
+        )
+      )
+    } else if (skipped.length > 0) {
+      // 部分未命中是正常的，从 console.warn 降级为 console.debug 并合并成一条，
+      // 避免 HW4 那种「20 条 aTangent 警告刷屏」
+      console.debug(
+        `[Mesh '${this.name}'] attributes not used by '${shader.name}': ${skipped.join(', ')}`
+      )
     }
+
+    this.vaos.set(shader.program, vao)
+    this.locationCaches.set(shader.program, locations)
+    return vao
   }
+
+  /**
+   * 作废所有已录制的 VAO（下次 bind 时重新录）。
+   *
+   * 何时需要：VBO 被**换成新的 buffer 对象**时。
+   * 只是往同一个 buffer 对象里 bufferData / bufferSubData 写新数据**不需要**调用它
+   * —— VAO 记的是 buffer 对象引用，内容变了不影响。
+   */
+  invalidateVAOs(): void {
+    const ext = this.vaoExt
+    ext.bindVertexArrayOES(null) // 先解绑，避免删掉当前绑定的对象
+    for (const vao of this.vaos.values()) ext.deleteVertexArrayOES(vao)
+    this.vaos.clear()
+    this.locationCaches.clear()
+  }
+
+  /**
+   * 缓存 attribute locations（由 Mesh 负责）
+   *
+   * 仅进行 attribute 名称到 location 的映射查询，
+   * 不涉及缓冲区数据的上传或绑定。
+   */
+  // cacheAttriLocations(shader: Shader): void {
+  //   this.locationCache.clear()
+
+  //   for (const name of this.attributes.keys()) {
+  //     const location = shader.getAttribLocation(name)
+  //     if (location >= 0) {
+  //       this.locationCache.set(name, location)
+  //     } else {
+  //       console.warn(
+  //         new MeshLocationCacheError(
+  //           name,
+  //           `Attribute '${name}' not found in '${shader.name}' shader program`,
+  //           this.name,
+  //           {
+  //             shaderProgramName: shader.name
+  //           }
+  //         )
+  //       )
+  //     }
+  //   }
+  // }
+
+  /**
+   * 获取 attribute location（从缓存）
+   *
+   * 配置 attribute pointer 并启用 attribute，
+   * 指定 GPU 如何解释已上传的缓冲区数据。
+   *
+   * 不会执行数据上传操作。
+   */
+  // getAttriLocation(name: string): number | undefined {
+  //   return this.locationCache.get(name)
+  // }
+  /** 加了 shader 参数（location 本来就是 (name, program) 的二元映射） */
+  getAttriLocation(name: string, shader: Shader): number | undefined {
+    return this.locationCaches.get(shader.program)?.get(name)
+  }
+
+  /**
+   * 绑定几何数据（由 Mesh 负责）
+   */
+  // bind(gl: WebGLRenderingContext) {
+  //   // console.debug(this.vbos.size)
+  //   // console.debug(this.locationCache.size)
+
+  //   for (const [name, vbo] of this.vbos) {
+  //     const location = this.getAttriLocation(name)
+  //     if (location === undefined || location < 0) continue
+
+  //     const attriData = this.attributes.get(name)
+  //     if (!attriData) {
+  //       throw new MeshValidationError(
+  //         'empty_attribute',
+  //         `VBO exists for attribute '${name}' but AttributeData is missing`,
+  //         this.constructor.name
+  //       )
+  //     }
+
+  //     gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+  //     gl.vertexAttribPointer(
+  //       location,
+  //       attriData.size,
+  //       attriData.type,
+  //       attriData.normalized ?? false,
+  //       attriData.stride ?? 0,
+  //       attriData.offset ?? 0
+  //     )
+  //     gl.enableVertexAttribArray(location)
+  //   }
+
+  //   // 绑定索引
+  //   if (this.ibo) {
+  //     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
+  //   }
+  // }
+
+  // ============================================================
+  //  变换 / 查询
+  // ============================================================
 
   /**
    * 获取 Model 矩阵
@@ -346,10 +551,19 @@ export class Mesh {
     return first ? first.array.length / first.size : 0
   }
 
-  /**
-   * 清理
-   */
+  // ============================================================
+  //  清理
+  // ============================================================
+
+  /** 清理 */
   dispose() {
+    const gl = this.gl
+    // ★新增 —— 顺序至关重要：
+    //   VAO 删掉之后，就不存在任何「还引用着这些 buffer 的顶点属性状态」，
+    //   下面的 deleteBuffer 便不可能再在别人的状态里留下 enabled + null 的空洞。
+    //   旧实现的黑屏 bug 正是死在这一步（buffer 删了，别人的 enabled 还开着）。
+    this.invalidateVAOs()
+
     /**
      * 需要清除的属性
      *
@@ -357,22 +571,27 @@ export class Mesh {
      * private ibo: WebGLBuffer | null = null
      * private locationCache: Map<string, number> = new Map()
      */
+    // 多个 attribute 可能共享同一个 VBO（interleaved），去重后再删
     const deletedVBOs: Set<WebGLBuffer> = new Set()
     for (const vbo of this.vbos.values()) {
       // 需要考虑多个 attribute 共享同一个 VBO（Interleaved）的情况，最好不要对同一个 VBO 调用多次 gl.deleteBuffer()
       if (!deletedVBOs.has(vbo)) {
         deletedVBOs.add(vbo)
-        this.gl.deleteBuffer(vbo)
+        gl.deleteBuffer(vbo)
       }
     }
     if (this.ibo) {
-      this.gl.deleteBuffer(this.ibo)
+      gl.deleteBuffer(this.ibo)
       this.ibo = null
     }
 
     this.vbos.clear()
     this.locationCache.clear()
   }
+
+  // ============================================================
+  //  内置几何体
+  // ============================================================
 
   static cube(transform: Transform, gl: WebGLRenderingContext) {
     const geometry = CubeGeometry.create()

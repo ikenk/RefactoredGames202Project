@@ -1,4 +1,5 @@
 import { GLTFMeshData } from '@/loaders/types/GLTFMeshData'
+import { Material } from '@/materials/Material'
 import { Uniforms } from '@/materials/types/Material'
 
 // ============================================================

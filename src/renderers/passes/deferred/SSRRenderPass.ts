@@ -135,7 +135,8 @@ export class SSRRenderPass implements RenderPass {
     // ==================== 绘制全屏 quad ====================
     // 后处理不需要深度测试
     gl.disable(gl.DEPTH_TEST)
-    this.fullScreenQuad.bind(gl)
+    // this.fullScreenQuad.bind(gl)
+    this.fullScreenQuad.bind(shader) // shader 即本 pass 的 ssrShader
     gl.drawElements(gl.TRIANGLES, this.fullScreenQuad.count, this.fullScreenQuad.indexData!.type, 0)
     gl.enable(gl.DEPTH_TEST)
   }

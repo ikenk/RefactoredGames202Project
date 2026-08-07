@@ -1,4 +1,6 @@
 import { OBJMeshData } from '@/loaders/types/OBJMeshData'
+import { Material } from '@/materials/Material'
+import { Uniforms } from '@/materials/types/Material'
 
 export interface MeshRendererFromOBJConfig {
   /** OBJ 加载得到的纯数据 */

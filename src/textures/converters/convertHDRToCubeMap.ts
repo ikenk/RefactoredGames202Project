@@ -3,10 +3,13 @@ import { MeshVBOCreationError } from '@/errors/EngineError/MeshError/MeshVBOCrea
 import { InvalidTextureFormatError } from '@/errors/EngineError/TextureError/InvalidTextureFormatError'
 import { TextureCreationError } from '@/errors/EngineError/TextureError/TextureCreationError'
 import { WebGLExtensionError } from '@/errors/EngineError/WebGLError/WebGLExtensionError'
+import { unbindVAO } from '@/objects/gl/unbindVAO'
 import { ShaderPaths } from '@/shaders/_config/shaderPaths'
 import { Shader } from '@/shaders/Shader'
 import { mat4 } from 'gl-matrix'
-import { DataTexture, TypedArray } from 'three'
+import { DataTexture } from 'three'
+import { HDRSourceData } from './types/convertHDRToCubeMap'
+import { ResourceLoadError } from '@/errors/EngineError/ResourceError/ResourceLoadError'
 
 // ==================== 模块级私有辅助函数 ====================
 
@@ -46,7 +49,15 @@ function createCubeVBO(gl: WebGLRenderingContext): WebGLBuffer {
   return vbo
 }
 
+/**
+ * 画一次 cube（HDR → cubemap 烘焙用）
+ *
+ * 同 drawCube：本函数绕过 Mesh 直接操作顶点属性槽位，
+ *    必须先 unbindVAO() 回到默认 VAO，否则会写脏某个 Mesh 的 VAO
+ */
 function renderCube(gl: WebGLRenderingContext, vbo: WebGLBuffer, shader: Shader) {
+  unbindVAO()
+
   gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
   const loc = shader.getAttribLocation('aVertexPosition')
   if (loc === -1) {
@@ -62,6 +73,20 @@ function renderCube(gl: WebGLRenderingContext, vbo: WebGLBuffer, shader: Shader)
   gl.disableVertexAttribArray(loc)
 }
 
+function isHDRSourceData(v: unknown): v is HDRSourceData {
+  if (typeof v !== 'object' || v === null) return false
+
+  // 断言成 Partial<> 之后逐个字段查类型 —— 比 'x' in v 更严，
+  // 因为 'x' in v 只证明「键存在」，值可能是 undefined / 字符串 / 任何东西
+  const o = v as Partial<HDRSourceData>
+
+  return (
+    ArrayBuffer.isView(o.data) && // TypedArray 都是 ArrayBufferView
+    typeof o.width === 'number' &&
+    typeof o.height === 'number'
+  )
+}
+
 // ==================== 主函数 ====================
 export async function convertHDRToCubeMap(
   gl: WebGLRenderingContext,
@@ -70,8 +95,13 @@ export async function convertHDRToCubeMap(
   options: { flipY: boolean; rotationY: number }
 ): Promise<WebGLTexture> {
   // 1. 验证输入 & 扩展
-  const { data, width, height }: { data: TypedArray; width: number; height: number } =
-    dataTexture.source.data
+  const source: unknown = dataTexture.source.data
+  if (!isHDRSourceData(source)) {
+    throw new ResourceLoadError('image', 'HDR', {
+      reason: 'DataTexture.source.data 不是预期的 { data, width, height } 形状'
+    })
+  }
+  const { data, width, height } = source
   if (!(data instanceof Float32Array)) {
     throw new InvalidTextureFormatError('HDR 环境贴图必须使用 Float32Array 格式', {
       actualType: data.constructor.name

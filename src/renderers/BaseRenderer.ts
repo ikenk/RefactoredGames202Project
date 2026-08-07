@@ -268,7 +268,10 @@ export abstract class BaseRenderer {
     this.shader.use()
 
     // ④ 几何数据
-    this.mesh.bind(gl)
+    // this.mesh.bind(gl)
+    // 传 shader 而非 gl：attribute 的 location 是【链接期】由每个 program 各自决定的，
+    // Mesh 需要知道本次绘制用的是哪个 program，才能绑定对应的那个 VAO
+    this.mesh.bind(this.shader)
 
     // ⑤ 引擎 uniform
     this.bindCameraParameters(camera)
@@ -292,6 +295,9 @@ export abstract class BaseRenderer {
     }
 
     // ⑧ 解绑
+    // 回到默认 VAO：那些绕过 Mesh 直接改顶点属性槽位的代码（drawCube / convertHDRToCubeMap）
+    // 于是只会写到默认 VAO 上，碰不到任何 Mesh 自己的 VAO。代价是一次 GL 调用。
+    this.mesh.unbind()
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
@@ -335,19 +341,22 @@ export abstract class BaseRenderer {
     gl.disable(gl.DEPTH_TEST)
 
     this.shader.use()
-    this.mesh.bind(gl)
+    // this.mesh.bind(gl)
+    this.mesh.bind(this.shader) // 同 draw()：VAO 按 program 区分
     this.bindHUDCameraParameters(camera)
-    context.textureUnitCounter = this.material.applyUniforms(
-      gl,
-      this.shader,
-      context.textureUnitCounter
-    )
+    // context.textureUnitCounter = this.material.applyUniforms(
+    //   gl,
+    //   this.shader,
+    //   context.textureUnitCounter
+    // )
+    context.textureUnitCounter = this.material.applyUniforms(gl, this.shader, 0)
     if (this.mesh.hasIndices) {
       gl.drawElements(this.drawMode, this.mesh.count, this.mesh.indexData!.type, 0)
     } else {
       gl.drawArrays(this.drawMode, 0, this.mesh.count)
     }
 
+    this.mesh.unbind() // 同 draw()：回到默认 VAO
     gl.enable(gl.DEPTH_TEST)
     gl.viewport(vpX, vpY, vpW, vpH)
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)

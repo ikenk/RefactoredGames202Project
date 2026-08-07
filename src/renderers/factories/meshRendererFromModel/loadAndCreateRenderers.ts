@@ -21,6 +21,7 @@ export async function loadAndCreateRenderers(
     for (const data of meshDataArr) {
       const renderer = await createMeshRendererFromGLTF(gl, {
         data,
+        rendererName: `${name}/${data.name}`,
         vertShaderPath,
         fragShaderPath,
         extraUniforms
@@ -32,6 +33,7 @@ export async function loadAndCreateRenderers(
     for (const data of meshDataArr) {
       const renderer = await createMeshRendererFromOBJ(gl, {
         data,
+        rendererName: `${name}/${data.name}`,
         vertShaderPath,
         fragShaderPath,
         extraUniforms

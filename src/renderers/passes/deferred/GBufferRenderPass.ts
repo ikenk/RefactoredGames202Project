@@ -59,8 +59,31 @@ export class GBufferRenderPass implements RenderPass {
     this.gBufferFBO.resize(width, height)
   }
 
+  /**
+   * 释放本 pass 持有的 GPU 资源
+   *
+   * 所有权约定：
+   * - GBufferRenderPass 是 deferred 管线的「主 pass」，地位对标 forward 管线的 ForwardRenderPass，
+   *   因此由它负责释放 targetRenderers（HW3 的场景没有 ForwardRenderPass，没人接手就会泄漏）
+   * - ShadowRenderPass 只是持有同一批 renderer 的引用，不负责释放（见该类的 dispose 注释），
+   *   所以这里不会造成重复 dispose
+   *
+   * 历史问题：
+   * - 本方法原先只做 targetRenderers.length = 0，renderer 里的 VBO / VAO / Shader 全部泄漏
+   * - 该泄漏曾意外「掩盖」了顶点属性槽位残留的 bug：HW3 的 VBO 没被删除，
+   *   槽位 3 才一直指着一块活 buffer，让 HW3 → HW4 看上去正常。
+   *   VAO 改造完成后这层依赖已经消失，可以安全释放
+   */
+  // dispose(): void {
+  //   this.gBufferFBO.dispose()
+  //   this.targetRenderers.length = 0
+  // }
   dispose(): void {
     this.gBufferFBO.dispose()
+
+    for (const targetRenderer of this.targetRenderers) {
+      targetRenderer.dispose()
+    }
     this.targetRenderers.length = 0
   }
 }
