@@ -2,7 +2,7 @@ import { HttpError } from '@/errors/EngineError/NetworkError/HTTPError'
 import { NetworkTimeoutError } from '@/errors/EngineError/NetworkError/NetworkTimeoutError'
 import { ShaderLoadError } from '@/errors/EngineError/ShaderError/ShaderLoadError'
 import { fetchTextWithTimeout } from '@/network/fetchText'
-import { ShaderCode, ShaderFile, ShaderType } from './types/Shader'
+import { ShaderCode, ShaderFile, ShaderStage } from './types/Shader'
 import { ShaderCreationError } from '@/errors/EngineError/ShaderError/ShaderCreationError'
 import { ShaderCompilationError } from '@/errors/EngineError/ShaderError/ShaderCompilationError'
 import { ShaderLinkError } from '@/errors/EngineError/ShaderError/ShaderLinkError'
@@ -295,7 +295,7 @@ export class Shader {
   /**
    * 包装 load 错误
    */
-  private static wrapLoadError(error: unknown, shaderType: ShaderType, shaderPath: string) {
+  private static wrapLoadError(error: unknown, shaderType: ShaderStage, shaderPath: string) {
     // HTTP 错误
     if (error instanceof HttpError) {
       return new ShaderLoadError(error.url, shaderType, {

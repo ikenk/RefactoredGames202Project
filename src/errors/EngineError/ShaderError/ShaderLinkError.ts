@@ -1,9 +1,10 @@
-import { ShaderTpye } from '@/shaders/types/Shader'
+import type { ShaderErrorKind } from '@/shaders/types/Shader'
 import { ShaderError } from './BaseError'
 
 export class ShaderLinkError extends ShaderError {
-  constructor(shaderPath: string, shaderType: ShaderTpye) {
+  constructor(shaderPath: string, shaderType: ShaderErrorKind) {
     const message = 'shader program link failed'
+
     super(message, 'SHADER_LINK_FAILED', {
       shaderPath,
       shaderType

@@ -9,8 +9,13 @@ export interface ShaderProgram {
   attribs: Record<string, GLint>
 }
 
-export type ShaderType = 'vertex' | 'fragment' | 'compute'
+// export type ShaderType = 'vertex' | 'fragment' | 'compute'
 // | 'program'
+// export type ShaderStageType = 'vertex' | 'fragment' | 'compute'
+// export type ShaderType = ShaderStageType | 'program'
+
+export type ShaderStage = 'vertex' | 'fragment' | 'compute'
+export type ShaderErrorKind = ShaderStage | 'program'
 
 export type ShaderFile = ShaderPath & ShaderCode
 

@@ -42,19 +42,19 @@ export abstract class EngineError extends Error {
   public readonly timestamp: Date
 
   // 错误上下文（附加信息）
-  public readonly context?: Record<string, any>
+  public readonly context?: Record<string, unknown>
 
   // 是否可恢复
   public readonly recoverable: boolean
 
   // 原始错误（Error Cause），用于错误链追踪
-  public readonly cause?: Error
+  public override readonly cause?: Error
 
   constructor(
     message: string,
     code: string,
     options: {
-      context?: Record<string, any>
+      context?: Record<string, unknown>
       recoverable?: boolean
       cause?: Error
     } = {}

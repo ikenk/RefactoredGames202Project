@@ -1,4 +1,4 @@
-import { ShaderType } from '@/shaders/types/Shader'
+import type { ShaderStage } from '@/shaders/types/Shader'
 import { ShaderError } from './BaseError'
 
 /**
@@ -8,7 +8,7 @@ export class ShaderCompilationError extends ShaderError {
   public readonly compileLog: string
 
   constructor(
-    shaderType: ShaderType,
+    shaderType: ShaderStage,
     shaderPath: string,
     compileLog: string,
     context?: {
@@ -30,13 +30,14 @@ export class ShaderCompilationError extends ShaderError {
   }
 
   override toUserMessage(): string {
-    const typeNames: { [key in ShaderType]: string } = {
+    const typeNames: Record<ShaderStage, string> = {
       vertex: '顶点着色器',
       fragment: '片段着色器',
       compute: '计算着色器'
     }
 
-    const typeName = this.shaderType ? typeNames[this.shaderType as ShaderType] : '着色器'
+    // const typeName = this.shaderType ? typeNames[this.shaderType] : '着色器'
+    const typeName = this.shaderType === 'program' ? '着色器程序' : typeNames[this.shaderType]
     return `${typeName}编译失败：${this.shaderPath}\n${this.compileLog}`
   }
 }

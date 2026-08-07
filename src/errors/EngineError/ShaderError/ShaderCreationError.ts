@@ -1,8 +1,8 @@
-import { ShaderTpye } from '@/shaders/types/Shader'
+import type { ShaderStage } from '@/shaders/types/Shader'
 import { ShaderError } from './BaseError'
 
 export class ShaderCreationError extends ShaderError {
-  constructor(shaderType: ShaderTpye, shaderPath?: string) {
+  constructor(shaderType: ShaderStage, shaderPath?: string) {
     const message = `${shaderType} shader creation failed`
     super(message, 'SHADER_CREATION_FAILED', {
       shaderPath: shaderPath ?? '',

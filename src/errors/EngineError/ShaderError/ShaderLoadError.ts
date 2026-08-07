@@ -1,4 +1,4 @@
-import { ShaderTpye } from '@/shaders/types/Shader'
+import type { ShaderStage } from '@/shaders/types/Shader'
 import { ShaderError } from './BaseError'
 
 export class ShaderLoadError extends ShaderError {
@@ -6,7 +6,7 @@ export class ShaderLoadError extends ShaderError {
 
   constructor(
     shaderPath: string,
-    shaderType: ShaderTpye,
+    shaderType: ShaderStage,
     context?: {
       reason?: string
       statusCode?: number
@@ -31,7 +31,7 @@ export class ShaderLoadError extends ShaderError {
       compute: '计算着色器'
     }
 
-    const typeName = this.shaderType ? typeNames[this.shaderType] : '着色器'
+    const typeName = this.shaderType === 'program' ? '着色器程序' : typeNames[this.shaderType]
 
     if (this.statusCode === 404) {
       return `找不到${typeName}文件：${this.shaderPath}`

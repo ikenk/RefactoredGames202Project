@@ -1,4 +1,4 @@
-import { ShaderTpye } from '@/shaders/types/Shader'
+import type { ShaderErrorKind } from '@/shaders/types/Shader'
 import { EngineError } from '../BaseError'
 
 /**
@@ -6,14 +6,14 @@ import { EngineError } from '../BaseError'
  */
 export class ShaderError extends EngineError {
   public readonly shaderPath: string
-  public readonly shaderType: ShaderTpye
+  public readonly shaderType: ShaderErrorKind
 
   constructor(
     message: string,
     code: string,
     options: {
       shaderPath: string
-      shaderType: ShaderTpye
+      shaderType: ShaderErrorKind
       context?: Record<string, any>
       recoverable?: boolean
       cause?: Error
