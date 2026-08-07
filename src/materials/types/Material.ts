@@ -1,4 +1,4 @@
-import { Vec2, Vec3, Vec4 } from '@/math/types/math'
+import type { Vec2, Vec3, Vec4 } from '@/math/types/math'
 
 /**
  * Shader Uniform 的类型标识。

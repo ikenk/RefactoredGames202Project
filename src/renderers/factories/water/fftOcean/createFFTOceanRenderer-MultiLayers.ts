@@ -1,3 +1,4 @@
+import { createFFTOceanLayerBlendConfigs } from '@/materials/water/createFFTOceanLayerBlendConfigs'
 import { FFTOceanMaterial } from '@/materials/water/FFTOceanMaterial-MultiLayers'
 import { WaterSurface } from '@/objects/WaterSurface'
 import { BaseRenderer } from '@/renderers/BaseRenderer'
@@ -62,9 +63,16 @@ export async function createFFTOceanRenderer(
 
   // 2: 材质
   // 纹理 uniform（uDisplacementMap 等）不需要此处填入，FFTOceanComputePass.applyOutputTextures() 会通过 updateMaterialUniforms 推送
+  // const material = new FFTOceanMaterial(
+  //   `${ctx} FFTOceanMaterial<${rendererName}>`,
+  //   oceanParamsCascade,
+  //   materialConfig
+  // )
+  const layerBlendConfigs = createFFTOceanLayerBlendConfigs(oceanParamsCascade)
+
   const material = new FFTOceanMaterial(
     `${ctx} FFTOceanMaterial<${rendererName}>`,
-    oceanParamsCascade,
+    layerBlendConfigs,
     materialConfig
   )
 

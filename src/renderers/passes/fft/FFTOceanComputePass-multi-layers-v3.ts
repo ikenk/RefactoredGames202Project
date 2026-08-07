@@ -7,17 +7,19 @@ import { OceanParams } from '@/simulation/ocean/fft/types/OceanParams'
 import { Spectrum } from '@/simulation/ocean/spectrums/Spectrum'
 import { ShaderPaths } from '@/shaders/_config/shaderPaths'
 import { InitialSpectrum } from '@/simulation/ocean/fft/InitialSpectrum'
-import { PhillipsSpectrum } from '@/simulation/ocean/spectrums/PhillipsSpectrum'
 import { Uniforms, UniformType } from '@/materials/types/Material'
 import { FrameContext } from '@/renderers/types/FrameContext'
 import { PerspectiveCamera } from 'three'
 import { Vec2 } from '@/math/types/math'
 import { RealtimeSpectrumGPU } from '@/simulation/ocean/fft/RealtimeSpectrumGPU'
 import { captureGLState, restoreGLState } from '@/utils/gl/withCleanGLState'
+import { PreparedFFTOceanLayer } from '@/simulation/ocean/fft/types/PreparedFFTOceanLayer'
+import { FFTOceanFoamParameterKey } from '@/simulation/ocean/fft/types/FFTOceanLayerRuntimeConfig'
 
 interface LayerState {
   N: number
   size: number
+  gravity: number
   realtimeSpectrum: RealtimeSpectrumGPU
   /** x/y 轴的波浪尖锐度（choppy waves 系数 λ） */
   choppiness: Vec2
@@ -52,8 +54,9 @@ export class FFTOceanComputePass implements RenderPass {
 
   static async create(
     gl: WebGLRenderingContext,
-    paramsCascade: OceanParams[],
-    spectrum?: Spectrum
+    // paramsCascade: OceanParams[],
+    // spectrum?: Spectrum,
+    preparedLayers: readonly PreparedFFTOceanLayer[]
   ): Promise<FFTOceanComputePass> {
     const ctx = '[FFTOceanComputePass]'
 
@@ -87,8 +90,12 @@ export class FFTOceanComputePass implements RenderPass {
       assemblyShader
     )
 
-    for (const params of paramsCascade) {
-      pass.addLayer(params, spectrum)
+    // for (const params of paramsCascade) {
+    //   pass.addLayer(params, spectrum)
+    // }
+
+    for (const preparedLayer of preparedLayers) {
+      pass.initializeLayerResources(preparedLayer)
     }
 
     return pass
@@ -108,15 +115,136 @@ export class FFTOceanComputePass implements RenderPass {
     this.assemblyShader = assemblyShader
   }
 
-  private addLayer(params: OceanParams, spectrum?: Spectrum) {
-    const gl = this.gl
-    const N = params.fftResolution
-    const choppiness = params.choppiness
+  // private addLayer(params: OceanParams, spectrum: Spectrum) {
+  //   const gl = this.gl
+  //   const N = params.fftResolution
+  //   const choppiness = params.choppiness
 
-    const initialSpectrum = new InitialSpectrum(params, spectrum ?? new PhillipsSpectrum())
+  //   const initialSpectrum = new InitialSpectrum(params, spectrum)
+  //   const realtimeSpectrum = new RealtimeSpectrumGPU(
+  //     gl,
+  //     params,
+  //     initialSpectrum,
+  //     this.fullscreenQuad,
+  //     this.spectrumShader
+  //   )
+
+  //   // Ping-pong：只需要 1 channel（RG 存一个复数）
+  //   const ppConfig = {
+  //     type: gl.FLOAT,
+  //     minFilter: gl.NEAREST,
+  //     magFilter: gl.NEAREST,
+  //     wrapS: gl.CLAMP_TO_EDGE,
+  //     wrapT: gl.CLAMP_TO_EDGE
+  //   }
+  //   const pingFBO = new FBO(gl, {
+  //     width: N,
+  //     height: N,
+  //     colorAttachmentCount: 1,
+  //     colorTextureConfig: ppConfig
+  //   })
+  //   const pongFBO = new FBO(gl, {
+  //     width: N,
+  //     height: N,
+  //     colorAttachmentCount: 1,
+  //     colorTextureConfig: ppConfig
+  //   })
+  //   this.pingFBOs.push(pingFBO)
+  //   this.pongFBOs.push(pongFBO)
+
+  //   // 4 个 packed IFFT 结果 FBO
+  //   const packedConfig = {
+  //     internalFormat: gl.RGBA,
+  //     format: gl.RGBA,
+  //     type: gl.FLOAT,
+  //     minFilter: gl.NEAREST,
+  //     magFilter: gl.NEAREST,
+  //     wrapS: gl.CLAMP_TO_EDGE,
+  //     wrapT: gl.CLAMP_TO_EDGE
+  //   }
+  //   const packedFBOs: FBO[] = []
+  //   for (let i = 0; i < 4; i++) {
+  //     packedFBOs.push(
+  //       new FBO(gl, {
+  //         width: N,
+  //         height: N,
+  //         colorAttachmentCount: 1,
+  //         colorTextureConfig: packedConfig
+  //       })
+  //     )
+  //   }
+
+  //   // 最终输出 FBO：3 个 color attachments（displacement / gradient / jacobian）
+  //   const finalConfig = {
+  //     internalFormat: gl.RGBA,
+  //     format: gl.RGBA,
+  //     type: gl.FLOAT,
+  //     minFilter: gl.LINEAR_MIPMAP_LINEAR,
+  //     magFilter: gl.LINEAR,
+  //     wrapS: gl.REPEAT,
+  //     wrapT: gl.REPEAT,
+  //     generateMipmap: true
+  //   }
+  //   const finalFBOs: [FBO, FBO] = [
+  //     new FBO(gl, {
+  //       width: N,
+  //       height: N,
+  //       colorAttachmentCount: 3,
+  //       colorTextureConfig: finalConfig
+  //     }),
+  //     new FBO(gl, {
+  //       width: N,
+  //       height: N,
+  //       colorAttachmentCount: 3,
+  //       colorTextureConfig: finalConfig
+  //     })
+  //   ]
+
+  //   // 第一帧 prevFoam 不存在 —— 把两份都清成 0
+  //   for (const fbo of finalFBOs) {
+  //     fbo.bind()
+  //     gl.clearColor(0, 0, 0, 0)
+  //     gl.clear(gl.COLOR_BUFFER_BIT)
+  //     fbo.unbind()
+  //   }
+
+  //   this.layerStates.push({
+  //     N,
+  //     size: params.size,
+  //     gravity: params.gravity,
+  //     realtimeSpectrum,
+  //     choppiness,
+  //     packedFBOs,
+  //     finalFBOs,
+  //     currentFinalIdx: 0,
+  //     foamDecayRate: params.foamDecayRate ?? 0.05,
+  //     foamAdd: params.foamAdd ?? 0.1,
+  //     foamBias: params.foamBias ?? 0.2,
+  //     foamPower: params.foamPower ?? 1.5
+  //   })
+  // }
+
+  private initializeLayerResources(preparedLayer: PreparedFFTOceanLayer): void {
+    const gl = this.gl
+
+    // const { params, initialSpectrum } = preparedLayer
+    // const N = params.fftResolution
+    // const choppiness = params.choppiness
+
+    // const realtimeSpectrum = new RealtimeSpectrumGPU(
+    //   gl,
+    //   params,
+    //   initialSpectrum,
+    //   this.fullscreenQuad,
+    //   this.spectrumShader
+    // )
+
+    const { evolutionConfig, runtimeConfig, initialSpectrum } = preparedLayer
+    const N = evolutionConfig.fftResolution
+
     const realtimeSpectrum = new RealtimeSpectrumGPU(
       gl,
-      params,
+      evolutionConfig,
       initialSpectrum,
       this.fullscreenQuad,
       this.spectrumShader
@@ -203,16 +331,24 @@ export class FFTOceanComputePass implements RenderPass {
 
     this.layerStates.push({
       N,
-      size: params.size,
+      // size: params.size,
+      // gravity: params.gravity,
+      size: evolutionConfig.size,
+      gravity: evolutionConfig.gravity,
       realtimeSpectrum,
-      choppiness,
+      // choppiness,
+      choppiness: runtimeConfig.choppiness,
       packedFBOs,
       finalFBOs,
       currentFinalIdx: 0,
-      foamDecayRate: params.foamDecayRate ?? 0.05,
-      foamAdd: params.foamAdd ?? 0.1,
-      foamBias: params.foamBias ?? 0.2,
-      foamPower: params.foamPower ?? 1.5
+      // foamDecayRate: params.foamDecayRate ?? 0.05,
+      // foamAdd: params.foamAdd ?? 0.1,
+      // foamBias: params.foamBias ?? 0.2,
+      // foamPower: params.foamPower ?? 1.5
+      foamDecayRate: runtimeConfig.foamDecayRate,
+      foamAdd: runtimeConfig.foamAdd,
+      foamBias: runtimeConfig.foamBias,
+      foamPower: runtimeConfig.foamPower
     })
   }
 
@@ -362,7 +498,12 @@ export class FFTOceanComputePass implements RenderPass {
     this.stockhamShader.set1i('uDirection', direction)
     this.stockhamShader.set1i('uFinalStage', 0) // 永远不做 final real-pack
 
-    this.fullscreenQuad.bind(gl)
+    // this.fullscreenQuad.bind(gl)
+    // ❗ 必须传 stockhamShader：本 quad 被 spectrum / stockham / assembly 三个 program 共用。
+    //    旧实现里 Mesh 只有一份 locationCache，create() 里连调三次 cacheAttriLocations
+    //    只有最后一次生效（该方法开头会 locationCache.clear()）。
+    //    现在每个 program 各有一份 VAO，三次调用才真正各起各的作用。
+    this.fullscreenQuad.bind(this.stockhamShader)
     gl.drawElements(gl.TRIANGLES, this.fullscreenQuad.count, this.fullscreenQuad.indexData!.type, 0)
   }
 
@@ -395,7 +536,8 @@ export class FFTOceanComputePass implements RenderPass {
     this.assemblyShader.set1f('uFoamBias', layerState.foamBias)
     this.assemblyShader.set1f('uFoamPower', layerState.foamPower)
 
-    this.fullscreenQuad.bind(gl)
+    // this.fullscreenQuad.bind(gl)
+    this.fullscreenQuad.bind(this.assemblyShader) // 同上：VAO 按 program 区分
     gl.drawElements(gl.TRIANGLES, this.fullscreenQuad.count, this.fullscreenQuad.indexData!.type, 0)
 
     // 切换 ping-pong
@@ -413,23 +555,69 @@ export class FFTOceanComputePass implements RenderPass {
     layer.choppiness = choppiness
   }
 
+  // /**
+  //  * 冷更新：用新参数重建该层的 InitialSpectrum 和 RealtimeSpectrum
+  //  * 不重建 FBO（N 不变），只重新生成 h0 + 时域演化器
+  //  */
+  // rebuildLayerSpectrum(layerIndex: number, newParams: OceanParams, spectrum: Spectrum): void {
+  //   const layer = this.layerStates[layerIndex]
+  //   if (!layer) return
+  //   if (newParams.fftResolution !== layer.N) {
+  //     console.warn(
+  //       `[FFTOceanComputePass] N 不一致，无法热重建（旧=${layer.N}, 新=${newParams.fftResolution}），需要重建整个 pass`
+  //     )
+  //     return
+  //   }
+  //   const initialSpectrum = new InitialSpectrum(newParams, spectrum)
+  //   layer.realtimeSpectrum.rebuildFromInitialSpectrum(initialSpectrum)
+  //   layer.size = newParams.size
+  //   layer.choppiness = newParams.choppiness
+  // }
+
   /**
-   * 冷更新：用新参数重建该层的 InitialSpectrum 和 RealtimeSpectrum
-   * 不重建 FBO（N 不变），只重新生成 h0 + 时域演化器
+   * 用外部已准备好的 CPU 频谱替换某一层的 h0/h0Conj。
+   *
+   * 这里只复用并重传现有 GPU 纹理；结构参数改变时必须重建整个 pass。
    */
-  rebuildLayerSpectrum(layerIndex: number, newParams: OceanParams, spectrum: Spectrum): void {
+  rebuildLayerFromPreparedInput(layerIndex: number, preparedLayer: PreparedFFTOceanLayer): void {
     const layer = this.layerStates[layerIndex]
     if (!layer) return
-    if (newParams.fftResolution !== layer.N) {
-      console.warn(
-        `[FFTOceanComputePass] N 不一致，无法热重建（旧=${layer.N}, 新=${newParams.fftResolution}），需要重建整个 pass`
-      )
+
+    // const { params: newParams, initialSpectrum } = preparedLayer
+    const { evolutionConfig, runtimeConfig, initialSpectrum } = preparedLayer
+
+    // if (
+    //   newParams.fftResolution !== layer.N ||
+    //   newParams.size !== layer.size ||
+    //   newParams.gravity !== layer.gravity
+    // ) {
+    //   console.warn('[FFTOceanComputePass] fftResolution、size 或 gravity 已改变，需要重建整个 pass')
+    //   return
+    // }
+
+    if (
+      evolutionConfig.fftResolution !== layer.N ||
+      evolutionConfig.size !== layer.size ||
+      evolutionConfig.gravity !== layer.gravity
+    ) {
+      console.warn('[FFTOceanComputePass] fftResolution、size 或 gravity 已改变，需要重建整个 pass')
       return
     }
-    const initialSpectrum = new InitialSpectrum(newParams, spectrum)
+
     layer.realtimeSpectrum.rebuildFromInitialSpectrum(initialSpectrum)
-    layer.size = newParams.size
-    layer.choppiness = newParams.choppiness
+
+    layer.choppiness = runtimeConfig.choppiness
+    layer.foamDecayRate = runtimeConfig.foamDecayRate
+    layer.foamAdd = runtimeConfig.foamAdd
+    layer.foamBias = runtimeConfig.foamBias
+    layer.foamPower = runtimeConfig.foamPower
+  }
+
+  setLayerFoamParameter(layerIndex: number, key: FFTOceanFoamParameterKey, value: number): void {
+    const layer = this.layerStates[layerIndex]
+    if (!layer) return
+
+    layer[key] = value
   }
 
   // ============================================================

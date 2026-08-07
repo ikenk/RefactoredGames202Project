@@ -13,7 +13,7 @@
 
 import type { Pane, FolderApi } from 'tweakpane'
 import { UniformEntry, UniformType } from '@/materials/types/Material'
-import type { Vec2, Vec3 } from '@/math/types/math'
+import type { Vec3 } from '@/math/types/math'
 import type { FFTOceanGUIDeps } from '../../types/setup-v4'
 import type {
   ControlDescriptor,
@@ -58,19 +58,24 @@ export function useTiering(deps: FFTOceanGUIDeps) {
     deps.computePass.setLayerChoppiness(d.layerIndex, layer.choppiness)
   }
 
-  function dispatchT2Foam(d: T2FoamDescriptor, v: number): void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const states = (deps.computePass as any).layerStates as
-      | Array<Record<string, number>>
-      | undefined
-    const target = states?.[d.layerIndex]
-    if (target) target[d.key] = v
+  // function dispatchT2Foam(d: T2FoamDescriptor, v: number): void {
+  //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //   const states = (deps.computePass as any).layerStates as
+  //     | Array<Record<string, number>>
+  //     | undefined
+  //   const target = states?.[d.layerIndex]
+  //   if (target) target[d.key] = v
+  // }
+
+  function dispatchT2Foam(d: T2FoamDescriptor, value: number): void {
+    deps.computePass.setLayerFoamParameter(d.layerIndex, d.key, value)
   }
 
   function dispatchT3Spectrum(d: T3SpectrumDescriptor): void {
     const layer = cascade[d.layerIndex]
     if (!layer) return
-    deps.computePass.rebuildLayerSpectrum(d.layerIndex, layer, deps.spectrum)
+    // deps.computePass.rebuildLayerSpectrum(d.layerIndex, layer, deps.spectrum)
+    deps.rebuildLayerSpectrum(d.layerIndex)
   }
 
   function dispatch(d: ControlDescriptor, v: number | Vec3): void {
@@ -203,14 +208,37 @@ export function useTiering(deps: FFTOceanGUIDeps) {
       })
   }
 
+  // function pushAll(descriptors: ControlDescriptor[]): void {
+  //   descriptors.forEach((d) => {
+  //     const binding = resolveBinding(d)
+  //     if (!binding) return
+  //     const v = binding.target[binding.key]
+  //     if (v === undefined || v === null) return
+  //     dispatch(d, v as number | Vec3)
+  //   })
+  // }
+
   function pushAll(descriptors: ControlDescriptor[]): void {
+    const spectrumLayersToRebuild = new Set<number>()
+
     descriptors.forEach((d) => {
       const binding = resolveBinding(d)
       if (!binding) return
+
       const v = binding.target[binding.key]
       if (v === undefined || v === null) return
+
+      if (d.tier === 'T3-spectrum') {
+        spectrumLayersToRebuild.add(d.layerIndex)
+        return
+      }
+
       dispatch(d, v as number | Vec3)
     })
+
+    for (const layerIndex of spectrumLayersToRebuild) {
+      deps.rebuildLayerSpectrum(layerIndex)
+    }
   }
 
   return { addControl, pushAll }

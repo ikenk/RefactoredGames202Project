@@ -10,7 +10,14 @@ import { FFTOceanComputePass } from '@/renderers/passes/fft/FFTOceanComputePass-
 import { ForwardRenderPass } from '@/renderers/passes/forward/ForwardRenderPass'
 import { LightSystem } from '@/lights/LightSystem'
 import { noonSun } from '@/lights/directionalLight/_presets/sun'
-import { JONSWAPSpectrum } from '@/simulation/ocean/spectrums/JONSWAPSpectrum'
+// import { JONSWAPSpectrum } from '@/simulation/ocean/spectrums/JONSWAPSpectrum'
+// import { createSpectrumFactory } from '@/simulation/ocean/spectrums/SpectrumFactory'
+import { createSpectrum } from '@/simulation/ocean/spectrums/SpectrumFactory'
+import { resolveSpectrumEvaluationContext } from '@/simulation/ocean/spectrums/resolveSpectrumEvaluationContext'
+import type { OceanParams } from '@/simulation/ocean/fft/types/OceanParams'
+import type { JONSWAPSpectrumModelConfig } from '@/simulation/ocean/spectrums/types/SpectrumModelConfig'
+import type { SpectrumEvaluationContext } from '@/simulation/ocean/spectrums/types/SpectrumEvaluationContext'
+import { prepareFFTOceanLayer } from '@/simulation/ocean/fft/prepareFFTOceanLayer'
 import { linearizeCubemap } from '@/textures/cubemap/linearizeCubemap'
 // import { setupFFTOceanGUI } from '@/gui/fftOcean/v3/setup'
 import { SpectrumAnalyzer } from '@/simulation/ocean/analysis/SpectrumAnalyzer'
@@ -93,14 +100,44 @@ export async function loadFFTOceanScene(ctx: SceneContext) {
     uFoamMap: { type: UniformType.TEXTURE_2D, value: foamTexture.glTextureOrThrow }
   })
 
-  const spectrum = new JONSWAPSpectrum()
-  const spectrumAnalyzer = new SpectrumAnalyzer(spectrum)
-  for (const oceanParam of oceanParamsCascade) {
-    const report = spectrumAnalyzer.analyze(oceanParam)
+  // const spectrum = new JONSWAPSpectrum()
+  // const spectrumAnalyzer = new SpectrumAnalyzer(spectrum)
+  // for (const oceanParam of oceanParamsCascade) {
+  //   const report = spectrumAnalyzer.analyze(oceanParam)
+  //   spectrumAnalyzer.printReport(report, oceanParam)
+  //   // spectrumAnalyzer.drawLogLogSpectrum(report, gl.canvas as HTMLCanvasElement)
+  // }
+  // const computePass = await FFTOceanComputePass.create(gl, oceanParamsCascade, spectrum)
+  // const spectrumFactory = createSpectrumFactory({ model: 'jonswap' })
+
+  // const preparedLayers = oceanParamsCascade.map((oceanParam) => {
+  //   // 每一层拥有自己的 Spectrum。
+  //   const spectrum = spectrumFactory(oceanParam)
+
+  //   const spectrumAnalyzer = new SpectrumAnalyzer(spectrum)
+  //   const report = spectrumAnalyzer.analyze(oceanParam)
+  //   spectrumAnalyzer.printReport(report, oceanParam)
+
+  //   spectrumAnalyzer.drawLogLogSpectrum(report, gl.canvas as HTMLCanvasElement)
+
+  //   // InitialSpectrum 在 ComputePass 外部创建。
+  //   return prepareFFTOceanLayer(oceanParam, spectrum)
+  // })
+
+  const preparedLayers = oceanParamsCascade.map((oceanParam) => {
+    const { modelConfig, context } = createJONSWAPLayerInputs(oceanParam)
+
+    const spectrum = createSpectrum(modelConfig)
+
+    const spectrumAnalyzer = new SpectrumAnalyzer(spectrum)
+    const report = spectrumAnalyzer.analyze(oceanParam, context)
+
     spectrumAnalyzer.printReport(report, oceanParam)
-    // spectrumAnalyzer.drawLogLogSpectrum(report, gl.canvas as HTMLCanvasElement)
-  }
-  const computePass = await FFTOceanComputePass.create(gl, oceanParamsCascade, spectrum)
+
+    return prepareFFTOceanLayer(oceanParam, context, spectrum)
+  })
+
+  const computePass = await FFTOceanComputePass.create(gl, preparedLayers)
   computePass.addReceiver(fftOceanRenderer)
 
   const forwardRenderPass = new ForwardRenderPass(lightSystem)
@@ -110,10 +147,61 @@ export async function loadFFTOceanScene(ctx: SceneContext) {
   renderer.addRenderPass(forwardRenderPass)
 
   const pane = mountPane()
+  const rebuildLayerSpectrum = (layerIndex: number): void => {
+    const oceanParam = oceanParamsCascade[layerIndex]
+
+    if (!oceanParam) {
+      console.warn(`[loadFFTOceanScene] 找不到第 ${layerIndex} 层，跳过频谱重建`)
+      return
+    }
+
+    const { modelConfig, context } = createJONSWAPLayerInputs(oceanParam)
+    const spectrum = createSpectrum(modelConfig)
+    const preparedLayer = prepareFFTOceanLayer(oceanParam, context, spectrum)
+
+    computePass.rebuildLayerFromPreparedInput(layerIndex, preparedLayer)
+  }
   setupFFTOceanGUI(pane, {
     config: fftOceanConfig,
     oceanRenderer: fftOceanRenderer,
     computePass,
-    spectrum
+    // spectrum
+    rebuildLayerSpectrum
   })
+}
+
+interface LegacyJONSWAPLayerInputs {
+  readonly modelConfig: JONSWAPSpectrumModelConfig
+  readonly context: Readonly<SpectrumEvaluationContext>
+}
+
+/**
+ * 过渡适配器：从旧 OceanParams 拆出模型配置和求值环境。
+ *
+ * 等 OceanParams 的消费者迁移完成后，这个适配器应连同
+ * OceanParams 一起删除。
+ */
+function createJONSWAPLayerInputs(params: OceanParams): LegacyJONSWAPLayerInputs {
+  if (params.spectrum0 === undefined) {
+    throw new TypeError('[loadFFTOceanScene] spectrum0 is required for the JONSWAP model')
+  }
+
+  const modelConfig: JONSWAPSpectrumModelConfig = {
+    model: 'jonswap',
+    primary: params.spectrum0,
+    secondary: params.spectrum1
+  }
+
+  const context = resolveSpectrumEvaluationContext({
+    size: params.size,
+    gravity: params.gravity,
+    depth: params.depth,
+    kMin: params.kMin,
+    kMax: params.kMax
+  })
+
+  return {
+    modelConfig,
+    context
+  }
 }

@@ -1,13 +1,14 @@
 import { Material } from '@/materials/Material'
-import { Uniforms, UniformType } from '@/materials/types/Material'
-import { OceanParams } from '@/simulation/ocean/fft/types/OceanParams'
-import { FFTOceanMaterialConfig } from './types/FFTOceanMaterialConfig'
+import { UniformType, type Uniforms } from '@/materials/types/Material'
+import type { FFTOceanMaterialConfig } from './types/FFTOceanMaterialConfig'
+import type { FFTOceanLayerBlendConfig } from './types/FFTOceanLayerBlendConfig'
 import { FFT_OCEAN_MATERIAL_DEFAULTS } from './_config/defaults'
 
 export class FFTOceanMaterial extends Material {
   constructor(
     label: string,
-    oceanParamsCascade: OceanParams[],
+    // oceanParamsCascade: OceanParams[],
+    layerBlendConfigs: readonly FFTOceanLayerBlendConfig[],
     config: FFTOceanMaterialConfig = {}
   ) {
     const p: Required<FFTOceanMaterialConfig> = { ...FFT_OCEAN_MATERIAL_DEFAULTS, ...config }
@@ -270,18 +271,42 @@ export class FFTOceanMaterial extends Material {
     //    uLayerSize[i]         — 该层物理波长 L（米），uv = worldXZ / L
     //    uLayerContribute[i]   — 采样侧混合权重（艺术量，默认 1.0）
     // ============================================================
-    for (let i = 0; i < oceanParamsCascade.length; i++) {
-      // ---- FFT Ocean 纹理 ----
-      uniforms[`uDisplacementMap${i}`] = { type: UniformType.TEXTURE_2D, value: null }
-      uniforms[`uGradientMap${i}`] = { type: UniformType.TEXTURE_2D, value: null }
-      uniforms[`uDispDerivativeMap${i}`] = { type: UniformType.TEXTURE_2D, value: null }
-      // 采样侧混合权重（艺术量），默认 1.0
+    // for (let i = 0; i < oceanParamsCascade.length; i++) {
+    //   // ---- FFT Ocean 纹理 ----
+    //   uniforms[`uDisplacementMap${i}`] = { type: UniformType.TEXTURE_2D, value: null }
+    //   uniforms[`uGradientMap${i}`] = { type: UniformType.TEXTURE_2D, value: null }
+    //   uniforms[`uDispDerivativeMap${i}`] = { type: UniformType.TEXTURE_2D, value: null }
+    //   // 采样侧混合权重（艺术量），默认 1.0
+    //   uniforms[`uLayerContribute${i}`] = {
+    //     type: UniformType.ONE_F,
+    //     value: oceanParamsCascade[i]!.layerContribute ?? 1.0
+    //   }
+    //   // ---- FFT Ocean 几何参数 ----
+    //   uniforms[`uLayerSize${i}`] = { type: UniformType.ONE_F, value: 0 }
+    // }
+    for (let i = 0; i < layerBlendConfigs.length; i++) {
+      const layerBlendConfig = layerBlendConfigs[i]!
+
+      uniforms[`uDisplacementMap${i}`] = {
+        type: UniformType.TEXTURE_2D,
+        value: null
+      }
+      uniforms[`uGradientMap${i}`] = {
+        type: UniformType.TEXTURE_2D,
+        value: null
+      }
+      uniforms[`uDispDerivativeMap${i}`] = {
+        type: UniformType.TEXTURE_2D,
+        value: null
+      }
       uniforms[`uLayerContribute${i}`] = {
         type: UniformType.ONE_F,
-        value: oceanParamsCascade[i]!.layerContribute ?? 1.0
+        value: layerBlendConfig.layerContribute ?? 1
       }
-      // ---- FFT Ocean 几何参数 ----
-      uniforms[`uLayerSize${i}`] = { type: UniformType.ONE_F, value: 0 }
+      uniforms[`uLayerSize${i}`] = {
+        type: UniformType.ONE_F,
+        value: 0
+      }
     }
 
     super(label, uniforms, null)
