@@ -45,8 +45,8 @@ export async function createPRTSHRenderer(
   const prtData = await loadPRTSHTxt(prtDataDir, modelName, transportType)
 
   // console.debug(prtData.lightSH)
-  console.debug(prtData.transportSH.length)
-  console.debug(meshTransform)
+  //   console.debug(prtData.transportSH.length)
+  //   console.debug(meshTransform)
 
   // 4. 创建 Mesh (transport SH 顶点属性)
   const mesh = createSHMesh(

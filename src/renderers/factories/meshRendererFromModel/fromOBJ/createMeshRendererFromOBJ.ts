@@ -48,7 +48,7 @@ export async function createMeshRendererFromOBJ(
     if (extraUniforms) {
       Object.assign(uniforms, extraUniforms)
     }
-    console.debug('[function createMeshRendererFromOBJ]', uniforms)
+    //     console.debug('[function createMeshRendererFromOBJ]', uniforms)
     material = new Material(`${data.name}_Material<${rendererName}>`, uniforms)
   }
 

@@ -179,7 +179,7 @@ export class Shader {
 
     const cached = Shader.cache.get(shaderName)
     if (cached) {
-      console.debug('cached')
+      //       console.debug('cached')
       return cached
     }
 

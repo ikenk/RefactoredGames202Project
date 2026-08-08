@@ -158,7 +158,7 @@ export class Engine {
     this.renderer = renderer
     this.perfMonitor = perfMonitor
 
-    console.log('✅ Class Engine has initialized')
+    //     console.log('✅ Class Engine has initialized')
   }
 
   /**
@@ -212,7 +212,7 @@ export class Engine {
 
     // 查询最大纹理单元
     const maxTexImgUnits = caps.maxFragmentTextureUnits
-    console.log('MAX_TEXTURE_IMAGE_UNITS:', maxTexImgUnits)
+    //     console.log('MAX_TEXTURE_IMAGE_UNITS:', maxTexImgUnits)
 
     // 监听上下文丢失
     canvas.addEventListener('webglcontextlost', (event) => {
@@ -414,7 +414,7 @@ export class Engine {
     camera: PerspectiveCamera
   ) {
     window.addEventListener('resize', () => {
-      console.log(`window resize, canvas size: ${canvas.width} * ${canvas.height}`)
+      //       console.log(`window resize, canvas size: ${canvas.width} * ${canvas.height}`)
       Engine.setupCanvas(canvas) // 更新 canvas.width/height
       Engine.setupGLViewport(canvas, gl) // 更新 gl.viewport
       Engine.updateCameraAspect(canvas, camera) // 只更新 aspect

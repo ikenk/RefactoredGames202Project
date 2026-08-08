@@ -35,7 +35,7 @@ export class Mesh {
   // Mesh 自己缓存 attribute locations
   //   问题：它只有 (attribute 名) 一个维度，隐含假设「一个 Mesh 只被一个 program 绘制」。
   //   而 ShadowPass.ts:70 和 FFTOceanComputePass-multi-layers-v3.ts:76-80 都违反了这个假设。
-  private locationCache: Map<string, number> = new Map()
+  // private locationCache: Map<string, number> = new Map()
 
   /** 每个 shader program 一个 VAO —— 补上了 program 这一维 */
   private vaos: Map<WebGLProgram, WebGLVertexArrayObjectOES> = new Map()
@@ -354,9 +354,9 @@ export class Mesh {
     } else if (skipped.length > 0) {
       // 部分未命中是正常的，从 console.warn 降级为 console.debug 并合并成一条，
       // 避免 HW4 那种「20 条 aTangent 警告刷屏」
-      console.debug(
-        `[Mesh '${this.name}'] attributes not used by '${shader.name}': ${skipped.join(', ')}`
-      )
+      //       console.debug(
+      //         `[Mesh '${this.name}'] attributes not used by '${shader.name}': ${skipped.join(', ')}`
+      //       )
     }
 
     this.vaos.set(shader.program, vao)
@@ -586,7 +586,7 @@ export class Mesh {
     }
 
     this.vbos.clear()
-    this.locationCache.clear()
+    // this.locationCache.clear()
   }
 
   // ============================================================

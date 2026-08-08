@@ -100,7 +100,7 @@ export function initCapabilities(gl: WebGLRenderingContext): GLCapabilities {
     vertexArrayObject: gl.getExtension('OES_vertex_array_object')
   }
 
-  console.log(`${ctx} `, _capabilities)
+  //   console.log(`${ctx} `, _capabilities)
   return _capabilities
 }
 

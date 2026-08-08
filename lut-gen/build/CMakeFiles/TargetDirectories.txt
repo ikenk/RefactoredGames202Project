@@ -1,6 +1,0 @@
-/Users/zhanghaoting/code-projects/Games/Games202/Homework/refactored-games202-project/lut-gen/build/CMakeFiles/lut-Emu-MC.dir
-/Users/zhanghaoting/code-projects/Games/Games202/Homework/refactored-games202-project/lut-gen/build/CMakeFiles/lut-Eavg-MC.dir
-/Users/zhanghaoting/code-projects/Games/Games202/Homework/refactored-games202-project/lut-gen/build/CMakeFiles/lut-Emu-IS.dir
-/Users/zhanghaoting/code-projects/Games/Games202/Homework/refactored-games202-project/lut-gen/build/CMakeFiles/lut-Eavg-IS.dir
-/Users/zhanghaoting/code-projects/Games/Games202/Homework/refactored-games202-project/lut-gen/build/CMakeFiles/edit_cache.dir
-/Users/zhanghaoting/code-projects/Games/Games202/Homework/refactored-games202-project/lut-gen/build/CMakeFiles/rebuild_cache.dir

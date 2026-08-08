@@ -78,7 +78,7 @@ export async function createMeshRendererFromGLTF(
     if (extraUniforms) {
       Object.assign(uniforms, extraUniforms)
     }
-    console.log('[function createMeshRendererFromGLTF]', uniforms)
+    //     console.log('[function createMeshRendererFromGLTF]', uniforms)
     material = new Material(`${data.name}_Material<${rendererName}>`, uniforms)
   }
 

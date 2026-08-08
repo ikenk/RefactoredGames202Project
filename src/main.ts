@@ -14,18 +14,15 @@ import { NetworkOfflineError } from './errors/EngineError/NetworkError/NetworkOf
 import { HttpError } from './errors/EngineError/NetworkError/HTTPError'
 import { EngineInitializationError } from './errors/EngineError/EngineInitializationError'
 
-// import { loadFFTOceanScene as loadFFTOceanSceneV3 } from './scenes/water/fftOcean/loadFFTOceanScene-multi-layers-v3'
-import { loadFFTOceanScene as loadFFTOceanSceneV4 } from './scenes/water/fftOcean/loadFFTOceanScene-multi-layers-v4'
-import { loadScene as loadCloudsOverSeaAndPeaksScene } from './scenes/shadertoy/lerrian/cloudsOverSeaAndPeaks/loadScene'
 import { loadGames202Scenes } from './scenes/games202/loadGames202Scene'
 
 let titleEle = document.querySelector('head title')
 if (!titleEle) {
   titleEle = document.createElement('title')
-  titleEle.textContent = `Refactored Games202 Project ${__BUILD_TIME__}`
+  titleEle.textContent = `GAMES202 Homework ${__BUILD_TIME__}`
   document.head.appendChild(titleEle)
 } else {
-  titleEle.textContent = `Refactored Games202 Project ${__BUILD_TIME__}`
+  titleEle.textContent = `GAMES202 Homework ${__BUILD_TIME__}`
 }
 
 const canvas = document.querySelector<HTMLCanvasElement>('#glcanvas')
@@ -49,16 +46,8 @@ const engine = Engine.create(canvas)
 engine
   .init()
   .then(async () => {
-    // ----- Games202 Homework 场景切换 -----
-    // return engine.loadScene(loadGames202Scenes)
-    // ----- 加载 wave -----
-    // simple waves
-    // loadWater
-    // return engine.loadScene(loadWater)
-    // fft ocean
-    return engine.loadScene(loadFFTOceanSceneV4)
-    // ----- 加载 Shadertoy Scene -----
-    // return engine.loadScene(loadCloudsOverSeaAndPeaksScene)
+    // ----- Games202 Homework 场景切换 (HW1..HW4，由 dat.GUI 下拉菜单驱动) -----
+    return engine.loadScene(loadGames202Scenes)
   })
   .then(() => {
     engine.start()
@@ -163,7 +152,7 @@ function showErrorDialog(config: {
 
 function reportError(errorData: any) {
   // 发送到监控服务（Sentry、LogRocket等）
-  console.log('Report error:', errorData)
+  //   console.log('Report error:', errorData)
 }
 
 function loadDefaultConfig() {}

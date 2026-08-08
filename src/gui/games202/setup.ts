@@ -62,7 +62,7 @@ export async function setupGames202HWSceneGUI(ctx: SceneContext) {
     // 1. 清理旧场景
     if (activeSceneDisposer) {
       activeSceneDisposer()
-      console.log('activeSceneDisposer: ', activeSceneDisposer)
+      //       console.log('activeSceneDisposer: ', activeSceneDisposer)
       activeSceneDisposer = null
     }
     // 2. 清空 renderer 的所有 pass（除了 WebGLRenderer 中的 overlayRenderPass)

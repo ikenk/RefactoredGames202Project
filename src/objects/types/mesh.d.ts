@@ -15,6 +15,19 @@
  * 数据会被存入 Vertex Buffer Object (VBO) 中，
  * 并在渲染时绑定到对应的 attribute location。
  */
+/**
+ * 引擎内置的标准顶点属性名。
+ *
+ * 这些名字在引擎自带的 shader（gizmo / lighting / deferred / pbr）中统一约定，
+ * `Mesh` 与各 RenderPass 依赖它们做 attribute location 缓存。
+ */
+export type BuiltinAttributeName =
+  | 'aVertexPosition'
+  | 'aNormalPosition'
+  | 'aTextureCoord'
+  | 'aTangent'
+  | 'aColor'
+
 export interface AttributeData {
   /**
    * attribute 在 shader 中的名称。
@@ -23,8 +36,18 @@ export interface AttributeData {
    * ```glsl
    * attribute vec3 aVertexPosition;
    * ```
+   *
+   * 类型写成 `BuiltinAttributeName | (string & {})` 而非纯 `string`：
+   * `string & {}` 与 `string` 赋值等价，但不会在联合类型里被 TS 吸收合并，
+   * 因此内置名仍能触发编辑器自动补全，同时允许各 pass 自带的自定义 attribute。
+   *
+   * 必须允许自定义名的原因：PRT（Precomputed Radiance Transfer）把每顶点的
+   * 球谐传输系数（transport SH coefficients）按 3 个一组拆进多条 attribute
+   * —— `aTransportSH0/1/2`（三阶 SH 共 9 个系数，见
+   * `src/shaders/prt/sphericalHarmonics/order3/vertex.vert`）。
+   * 这类逐场景的属性无法穷举进内置联合类型。
    */
-  name: 'aVertexPosition' | 'aNormalPosition' | 'aTextureCoord' | 'aTangent' | 'aColor'
+  name: BuiltinAttributeName | (string & {})
   /**
    * 实际的顶点数据。
    *

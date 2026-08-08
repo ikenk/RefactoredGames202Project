@@ -1,5 +1,5 @@
 {
-  "name": "refactored-games202-project",
+  "name": "games202-homework",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -12,16 +12,10 @@
     "lint:dev": "LINT_MODE=development eslint .",
     "lint:prod": "LINT_MODE=production eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write \"src/**/*.{ts,js,json,css,html,md,glsl,vert,frag,vs,fs,glslf,glslv}\" \"tests/**/*.ts\" \"*.{js,ts,json,md,html}\" \".prettierrc.json\"",
-    "format:check": "prettier --check \"src/**/*.{ts,js,json,css,html,md,glsl,vert,frag,vs,fs,glslf,glslv}\" \"tests/**/*.ts\" \"*.{js,ts,json,md,html}\" \".prettierrc.json\"",
+    "format": "prettier --write \"src/**/*.{ts,js,json,css,html,md,glsl,vert,frag,vs,fs,glslf,glslv}\" \"*.{js,ts,json,md,html}\" \".prettierrc.json\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js,json,css,html,md,glsl,vert,frag,vs,fs,glslf,glslv}\" \"*.{js,ts,json,md,html}\" \".prettierrc.json\"",
     "check": "npm run type-check && npm run lint:prod && npm run format:check",
     "fix": "npm run lint:fix && npm run format",
-    "test": "vitest run",
-    "test:unit": "vitest run --project unit",
-    "test:browser": "vitest run --project browser",
-    "test:watch": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
     "prepare": "husky install",
     "commit": "cz"
   },
@@ -37,7 +31,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "GAMES202 作业实现（HW1 Shadow / HW2 PRT / HW3 SSR / HW4 Kulla-Conty），手写 WebGL 渲染引擎",
   "dependencies": {
     "@tweakpane/core": "^2.0.5",
     "dat.gui": "^0.7.9",
@@ -53,8 +47,6 @@
     "@types/dat.gui": "^0.7.13",
     "@types/node": "^24.0.3",
     "@types/three": "^0.177.0",
-    "@vitest/browser": "4.1.5",
-    "@vitest/browser-playwright": "^4.1.5",
     "commitizen": "^4.3.1",
     "cz-git": "^1.12.0",
     "eslint": "^9.2.0",
@@ -67,15 +59,13 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
     "mathjs": "^15.2.0",
-    "playwright": "^1.59.1",
     "prettier": "^3.6.2",
     "prettier-plugin-glsl": "^0.2.2",
     "rollup-plugin-visualizer": "^6.0.3",
     "terser": "^5.43.1",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.52.0",
-    "vite": "^6.3.5",
-    "vitest": "4.1.5"
+    "vite": "^6.3.5"
   },
   "config": {
     "commitizen": {

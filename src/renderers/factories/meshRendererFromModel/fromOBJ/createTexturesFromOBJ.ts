@@ -28,7 +28,7 @@ export function createTexturesFromOBJ(
     if (isTextureImageSource(image)) {
       tex.createFromImage(image)
     } else {
-      console.debug(`[OBJ Texture] ${field} → fallback 纯色`)
+      //       console.debug(`[OBJ Texture] ${field} → fallback 纯色`)
       if (TEXTURE_FALLBACK_MAP[field]) {
         const { colorField, fallback } = TEXTURE_FALLBACK_MAP[field]
         const color: Vec3 = colorField

@@ -1,138 +1,84 @@
-# AImimi Engine
+# GAMES202 Homework
 
-> 前身 (formerly):Refactored Games202 Project。
-> 把 GAMES202(实时高质量渲染)作业重构为模块化、可扩展的 WebGL 图形项目;
-> 其中包含一个从频谱 (spectrum) 到着色 (shading) 端到端自研的**多层级 (cascade) FFT 海洋**。
+> GAMES202（闫令琪《现代计算机图形学入门：实时高质量渲染》）四次作业的完整实现，
+> 跑在一套**从零手写的 WebGL 1.0 渲染引擎**上——不依赖 three.js 的渲染管线。
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
 ![WebGL](https://img.shields.io/badge/WebGL-1.0-990000?logo=webgl&logoColor=white)
-![Three.js](https://img.shields.io/badge/Three.js-000000?logo=three.js&logoColor=white)
-![Vitest](https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white)
 
-![FFT Ocean](public/assets/screenshots/sunny-ocean-0degree.jpg)
-![FFT Ocean](public/assets/screenshots/sunny-ocean-90degree.jpg)
+## 这是什么
 
-## 这是什么 (Overview)
+本分支是 [AImimi Engine](../../tree/main) 的 **GAMES202 作业展示版**：从主线工程中剥离出运行四次作业所需的最小代码集，去掉了 FFT 海洋、流体模拟、Shadertoy 等与作业无关的部分。
 
-本项目是 GAMES202(GAMES 系列 · 闫令琪《现代计算机图形学入门:实时高质量渲染》)课程作业的重构版。原始作业保留在 `src/scenes/games202/`,在此基础上重构出一套可复用的最小渲染引擎 (engine),并扩展了一条完整的 GPU FFT 海洋 (FFT Ocean) 渲染管线。
+想看完整引擎（含多层级 FFT 海洋渲染管线）请切到 `main` 分支。
 
-目标:从"能跑通作业"过渡到"引擎 (engine) + 场景 (scene)"分层、可维护、可扩展的工程结构。
+## 四次作业
 
-## 技术亮点 (Highlights)
+| 作业    | 主题                     | 场景                  | 关键实现                                                                                   |
+| ------- | ------------------------ | --------------------- | ------------------------------------------------------------------------------------------ |
+| **HW1** | 实时阴影 Shadow Mapping  | Mary + 地板           | Hard Shadow / PCF / PCSS 三档可切；深度可选 RGBA 打包或 depth texture                      |
+| **HW2** | 预计算辐射传输 PRT       | Mary + 环境立方体贴图 | 3 阶球谐（9 系数）传输向量逐顶点存储；unshadowed / shadowed / interreflection 三种传输模式 |
+| **HW3** | 屏幕空间反射 SSR         | Cave + Cube           | 延迟渲染 G-Buffer → 深度 mipmap 层次加速 → 屏幕空间光线步进                                |
+| **HW4** | Kulla-Conty 多次散射补偿 | 5×2 粗糙度球阵        | 上排 Cook-Torrance（仅单次散射），下排叠加 Kulla-Conty 补偿项；`E`/`Eavg` LUT 预计算       |
 
-- **自研最小渲染引擎**:Engine / RenderPass / BaseRenderer / Mesh / Material / Shader 分层抽象,主循环驱动多 pass 渲染。
-- **GPU FFT 海洋全链路**:JONSWAP 频谱 (spectrum) → 实时频谱 (realtime spectrum) `h(k,t)` → GPU Stockham IFFT → packed assembly → 4 层 cascade → PBR 着色(Fresnel / Cook-Torrance / 次表面散射 (SSS) / 基于图像的光照 (IBL) / 雾 (fog) / 泡沫 (foam))。
-- **GAMES202 作业重构**:实时阴影 (shadow)、预计算辐射传输 (PRT)、屏幕空间反射 (SSR)、Kulla-Conty 多次散射 BRDF。
-- **离线工具链(内置外部框架)**:`lut-gen`(Kulla-Conty BRDF LUT 生成)与 `prt`(Nori 2 球谐 (SH) 预计算)为外部教学框架,内置仅为方便使用。
-- **工程化**:TypeScript 严格类型、ESLint + Prettier(含 GLSL 格式化)、Vitest 单元测试 + Playwright e2e、Husky + commitlint + commitizen。
+四个场景通过右上角 `switch scenes` 下拉菜单实时切换。
 
-## 效果展示 (Showcase)
+## 快速开始
 
-多层级 FFT 海洋 (FFT Ocean):
-
-[![FFT Ocean](public/assets/screenshots/sunny-ocean-0degree.jpg)](public/assets/screenshots/sunny-ocean-web.mp4)
-
-> ▶ 点击上图播放 FFT 海洋演示(mp4)
-
-## 快速开始 (Quick Start)
-
-前置:Node.js、支持 **WebGL 1.0** 的现代浏览器(项目显式启用了多个 WebGL 扩展)。
+前置：Node.js（见 `.nvmrc`）、支持 **WebGL 1.0** 的现代浏览器。
 
 ```bash
 npm install
-npm run dev        # 本地开发 (Vite)
-npm run build      # 生产构建(自动复制 shader:copy-shaders.sh)
-npm run type-check # TypeScript 类型检查
-npm run test       # 单元测试 (Vitest)
-npm run test:e2e   # 浏览器端到端 (Playwright)
+npm run dev
 ```
 
-### 离线工具子项目(可选)
+其他命令：
 
-`lut-gen` 与 `prt` 是 C++ 子项目(各自带 CMake),**仅在需要重新生成 BRDF LUT / PRT 预计算数据时**才构建;主程序运行不依赖现场编译它们。二者均为外部公开教学框架,内置到仓库只为使用方便。
-
-## 架构总览 (Architecture)
-
-一帧画面的数据流:
-
-```text
-Engine
-  └─ FrameClock.tick()
-     └─ updaters.update()
-        └─ WebGLRenderer.render(frameContext)
-           └─ RenderPass.execute()
-              └─ BaseRenderer.draw()
-                 ├─ Mesh.bind()
-                 ├─ Material.applyUniforms()
-                 └─ gl.drawElements()
+```bash
+npm run build
 ```
 
-| 抽象 (abstraction) | 职责                                                          |
-| ------------------ | ------------------------------------------------------------- |
-| `Engine`           | WebGL 上下文、相机、控制器、GUI、性能监控、FrameClock、主循环 |
-| `WebGLRenderer`    | 按顺序执行各 RenderPass                                       |
-| `RenderPass`       | 一帧中的一个阶段(forward / shadow / fft / overlay)            |
-| `BaseRenderer`     | 把一个 Mesh + Material + Shader 画出来                        |
-| `Mesh`             | 几何数据与 VBO / IBO                                          |
-| `Material`         | uniforms 与 textures                                          |
-| `Shader`           | 编译、链接、缓存 attribute / uniform location                 |
-
-FFT 海洋管线的端到端细节见 [docs/fft-ocean-pipeline.md](docs/fft-ocean-pipeline.md)。
-
-## 场景与模块 (Scenes & Modules)
-
-| 场景                | 内容                                |
-| ------------------- | ----------------------------------- |
-| `games202/hw1`      | 实时阴影 (Shadow Map → PCSS)        |
-| `games202/hw2`      | 预计算辐射传输 (PRT),球谐 (SH) 光照 |
-| `games202/hw3`      | 屏幕空间反射 (SSR),cave / cube 场景 |
-| `games202/hw4`      | Kulla-Conty 多次散射 BRDF + IBL     |
-| `water/fftOcean`    | 多层级 cascade FFT 海洋             |
-| `shadertoy/lerrian` | Shadertoy 移植                      |
-| `environment`       | 天空盒 (skybox) / 背景              |
-| `axes`              | 调试用坐标轴                        |
-
-`src/` 关键模块:`engine.ts`(引擎入口)、`renderers/`(pass 与 renderer)、`simulation/ocean/`(频谱与 IFFT)、`shaders/`、`materials/`、`scenes/`。
-
-## 目录结构 (Project Structure)
-
-```text
-src/        引擎与场景源码
-tests/      单元 / 集成测试
-public/     静态资源(贴图、模型、截图)
-docs/       项目级文档
-scripts/    工程脚本(构建、文档索引)
-lut-gen/    BRDF LUT 离线生成(外部框架,C++)
-prt/        PRT 球谐预计算(Nori 2,外部框架,C++)
+```bash
+npm run check
 ```
 
-## 文档地图 (Documentation Map)
+`check` = 类型检查（`tsc --noEmit`）+ ESLint 生产模式 + Prettier 格式校验。
 
-- [docs/learning-path.md](docs/learning-path.md) — 推荐的代码阅读顺序(从引擎到 FFT)
-- [docs/fft-ocean-pipeline.md](docs/fft-ocean-pipeline.md) — FFT 海洋端到端数据流与各阶段职责
-- [docs/fft-ocean-theory.md](docs/fft-ocean-theory.md) — 理论、数学↔代码映射、落地陷阱
-- [docs/CONVENTIONS.md](docs/CONVENTIONS.md) — 命名 / 提交 / 目录约定
-- [docs/INDEX.md](docs/INDEX.md) — 全量文档索引(自动生成)
+## 目录结构
 
-踩坑复盘 (postmortem):
+```
+src/
+├── engine.ts              引擎装配与主循环
+├── main.ts                入口
+├── renderers/
+│   ├── BaseRenderer.ts    渲染器基类（持有 mesh + material + shader）
+│   ├── WebGLRenderer.ts   RenderPass 调度器
+│   └── passes/            shadow / forward / deferred(GBuffer·SSR) / overlay
+├── objects/               Mesh、几何体、PRT 球谐网格
+├── materials/             PBR / PRT / 环境 / 光源材质
+├── shaders/               GLSL（运行时按路径加载，见 _config/shaderPaths.ts）
+├── lights/                方向光、光源可视化、LightSystem
+├── framebuffers/          FBO 封装（ShadowMap / GBuffer / DepthMipmap）
+├── scenes/games202/       ⭐ 四次作业的场景装配
+└── gui/                   dat.GUI / Tweakpane 面板
+```
 
-- [src/simulation/ocean/fft/postmortem-fft-axis-misalignment.md](src/simulation/ocean/fft/postmortem-fft-axis-misalignment.md) — FFT 纹理轴 / 世界轴错位
+资源在 `public/assets/`：`models/hw1..hw4`（模型）、`data/prt/hw2`（球谐传输系数）、
+`textures/environment`（立方体贴图与 HDR）、`textures/luts/pbr`（Kulla-Conty LUT）。
 
-模块级 README:`src/renderers/` · `src/objects/` · `src/shaders/` · `src/lights/visualizers/`
+## 关于 shader 加载
 
-## 开发约定 (Conventions)
+GLSL 不走 ES module 导入，而是运行时按 URL 拉取：路径集中定义在
+`src/shaders/_config/shaderPaths.ts`，构建时由 Vite 插件把 `src/shaders/` 整体复制到 `dist/shaders/`。
 
-- 提交信息遵循 Conventional Commits,使用 `npm run commit`(commitizen)。
-- 文档命名、目录组织见 [docs/CONVENTIONS.md](docs/CONVENTIONS.md)。
-- 代码风格:ESLint + Prettier(含 `prettier-plugin-glsl`);提交前由 Husky + lint-staged 校验。
+改 shader 无需重启开发服务器，刷新页面即可。
 
-## License & 致谢 (Acknowledgements)
+## 已知问题
 
-本仓库为**个人学习用途**的 GAMES202 作业重构。
+- 切换场景时，上一个场景注册的 GUI 面板（如 HW3 的 `HW3 Cave Light`）不会被清理，会残留在面板上。功能不受影响。
+- 离线预计算工具（Kulla-Conty LUT 生成、Nori 2 球谐预计算）不在本分支内——生成结果已直接放进 `public/assets/`。
 
-- 课程:GAMES202《现代计算机图形学入门:实时高质量渲染》(闫令琪 / GAMES)。
-- `prt/` 基于 Wenzel Jakob 的 [Nori 2](https://wjakob.github.io/nori/)(EPFL Advanced Computer Graphics)。
-- `lut-gen/` 基于 GAMES202 课程提供的 Kulla-Conty BRDF LUT 生成框架。
+## 许可
 
-内置的外部子项目版权归原作者所有,各自遵循其原始许可协议。
+课程作业实现，仅供学习参考。模型与环境贴图资源版权归原作者所有。

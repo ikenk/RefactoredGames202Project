@@ -34,7 +34,7 @@ export async function createCubemapBackground(
   const defaultFaceKeys = ['px', 'nx', 'py', 'ny', 'pz', 'nz']
   const faceKeys = config.faceKeys ?? defaultFaceKeys
 
-  console.debug(config)
+  //   console.debug(config)
 
   const tex = new CubeMapTexture(gl)
 
