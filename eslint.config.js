@@ -162,6 +162,20 @@ export default [
           selector: 'typeAlias',
           format: ['PascalCase']
         }
+      ],
+
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/deprecated/**', '**/*-deprecated', '**/*-Deprecated/**'],
+              message:
+                'deprecated 代码被 .gitignore 排除、从不入库。活代码 import 它 = 本地能跑、全新克隆必挂。' +
+                '需要的话把用到的部分抽到正式路径下。'
+            }
+          ]
+        }
       ]
     }
   },

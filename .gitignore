@@ -6,6 +6,8 @@ codex-*
 # deprecated
 deprecated/
 src/**/*deprecated*
+**/*-deprecated
+**/*-Deprecated/**
 
 # Log
 logs
