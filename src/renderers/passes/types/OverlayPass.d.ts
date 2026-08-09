@@ -1,4 +1,4 @@
-import { BaseRenderer } from '../BaseRenderer'
+import { BaseRenderer } from '@/renderers/BaseRenderer'
 
 /**
  * HUD（抬头显示）条目：一个覆盖层小视口里要画的东西。
