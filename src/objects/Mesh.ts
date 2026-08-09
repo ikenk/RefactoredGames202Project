@@ -35,7 +35,7 @@ export class Mesh {
   // Mesh 自己缓存 attribute locations
   //   问题：它只有 (attribute 名) 一个维度，隐含假设「一个 Mesh 只被一个 program 绘制」。
   //   而 ShadowPass.ts:70 和 FFTOceanComputePass-multi-layers-v3.ts:76-80 都违反了这个假设。
-  private locationCache: Map<string, number> = new Map()
+  // private locationCache: Map<string, number> = new Map()
 
   /** 每个 shader program 一个 VAO —— 补上了 program 这一维 */
   private vaos: Map<WebGLProgram, WebGLVertexArrayObjectOES> = new Map()
@@ -586,7 +586,7 @@ export class Mesh {
     }
 
     this.vbos.clear()
-    this.locationCache.clear()
+    // this.locationCache.clear()
   }
 
   // ============================================================
