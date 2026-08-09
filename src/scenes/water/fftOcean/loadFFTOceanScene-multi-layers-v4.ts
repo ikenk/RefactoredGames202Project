@@ -17,6 +17,7 @@ import { resolveSpectrumEvaluationContext } from '@/simulation/ocean/spectrums/r
 import type { OceanParams } from '@/simulation/ocean/fft/types/OceanParams'
 import type { JONSWAPSpectrumModelConfig } from '@/simulation/ocean/spectrums/types/SpectrumModelConfig'
 import type { SpectrumEvaluationContext } from '@/simulation/ocean/spectrums/types/SpectrumEvaluationContext'
+import { createFFTOceanLayerPreparationInput } from '@/simulation/ocean/fft/createFFTOceanLayerPreparationInput'
 import { prepareFFTOceanLayer } from '@/simulation/ocean/fft/prepareFFTOceanLayer'
 import { linearizeCubemap } from '@/textures/cubemap/linearizeCubemap'
 // import { setupFFTOceanGUI } from '@/gui/fftOcean/v3/setup'
@@ -128,13 +129,14 @@ export async function loadFFTOceanScene(ctx: SceneContext) {
     const { modelConfig, context } = createJONSWAPLayerInputs(oceanParam)
 
     const spectrum = createSpectrum(modelConfig)
+    const preparationInput = createFFTOceanLayerPreparationInput(oceanParam, context)
 
     const spectrumAnalyzer = new SpectrumAnalyzer(spectrum)
     const report = spectrumAnalyzer.analyze(oceanParam, context)
 
     spectrumAnalyzer.printReport(report, oceanParam)
 
-    return prepareFFTOceanLayer(oceanParam, context, spectrum)
+    return prepareFFTOceanLayer(preparationInput, spectrum)
   })
 
   const computePass = await FFTOceanComputePass.create(gl, preparedLayers)
@@ -157,7 +159,8 @@ export async function loadFFTOceanScene(ctx: SceneContext) {
 
     const { modelConfig, context } = createJONSWAPLayerInputs(oceanParam)
     const spectrum = createSpectrum(modelConfig)
-    const preparedLayer = prepareFFTOceanLayer(oceanParam, context, spectrum)
+    const preparationInput = createFFTOceanLayerPreparationInput(oceanParam, context)
+    const preparedLayer = prepareFFTOceanLayer(preparationInput, spectrum)
 
     computePass.rebuildLayerFromPreparedInput(layerIndex, preparedLayer)
   }

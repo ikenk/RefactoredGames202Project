@@ -1,11 +1,12 @@
 import { InitialSpectrum } from './InitialSpectrum'
-import type { OceanParams } from './types/OceanParams'
+// import type { OceanParams } from './types/OceanParams'
 import type { PreparedFFTOceanLayer } from './types/PreparedFFTOceanLayer'
 import type { Spectrum } from '../spectrums/Spectrum'
-import { SpectrumEvaluationContext } from '../spectrums/types/SpectrumEvaluationContext'
-import { FFTSpectrumEvolutionConfig } from './types/FFTSpectrumEvolutionConfig'
-import { InitialSpectrumConfig } from './types/InitialSpectrumConfig'
-import { FFTOceanLayerRuntimeConfig } from './types/FFTOceanLayerRuntimeConfig'
+// import { SpectrumEvaluationContext } from '../spectrums/types/SpectrumEvaluationContext'
+// import { FFTSpectrumEvolutionConfig } from './types/FFTSpectrumEvolutionConfig'
+// import { InitialSpectrumConfig } from './types/InitialSpectrumConfig'
+// import { FFTOceanLayerRuntimeConfig } from './types/FFTOceanLayerRuntimeConfig'
+import { FFTOceanLayerPreparationInput } from './types/FFTOceanLayerPreparationInput'
 
 /**
  * 将已经由上层选定、校验完成的 Spectrum 采样为单层初始频谱。
@@ -22,28 +23,21 @@ import { FFTOceanLayerRuntimeConfig } from './types/FFTOceanLayerRuntimeConfig'
 //   }
 // }
 
+/**
+ * 将已经由上层完成提取和校验的输入装配为单层 FFT Ocean CPU 数据。
+ *
+ * 该函数：
+ *
+ * - 不读取旧 OceanParams；
+ * - 不选择或创建 Spectrum；
+ * - 不创建 Shader、Texture 或 FBO；
+ * - 只负责生成 InitialSpectrum，并组装 ComputePass 的窄输入。
+ */
 export function prepareFFTOceanLayer(
-  params: OceanParams,
-  context: SpectrumEvaluationContext,
+  input: FFTOceanLayerPreparationInput,
   spectrum: Spectrum
 ): PreparedFFTOceanLayer {
-  const evolutionConfig: FFTSpectrumEvolutionConfig = {
-    size: context.size,
-    fftResolution: params.fftResolution,
-    gravity: context.gravity
-  }
-
-  const initialSpectrumConfig: InitialSpectrumConfig = {
-    amplitude: params.amplitude
-  }
-
-  const runtimeConfig: FFTOceanLayerRuntimeConfig = {
-    choppiness: [params.choppiness[0], params.choppiness[1]],
-    foamDecayRate: params.foamDecayRate ?? 0.05,
-    foamAdd: params.foamAdd ?? 0.1,
-    foamBias: params.foamBias ?? 0.2,
-    foamPower: params.foamPower ?? 1.5
-  }
+  const { context, evolutionConfig, initialSpectrumConfig, runtimeConfig } = input
 
   return {
     evolutionConfig,
