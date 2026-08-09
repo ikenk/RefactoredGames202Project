@@ -1,4 +1,3 @@
-import { BaseRenderer } from '@/renderers/BaseRenderer'
 import { FrameContext } from '@/renderers/types/FrameContext'
 import { PerspectiveCamera } from 'three'
 

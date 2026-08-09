@@ -2,7 +2,7 @@ import { FrameContext } from '@/renderers/types/FrameContext'
 import { PerspectiveCamera } from 'three'
 import { RenderPass } from '../types/RenderPass'
 import { MeshRenderer } from '@/renderers/MeshRenderer'
-import { HUDEntry } from '@/renderers/types/WebGLRenderer-deprecated'
+import { HUDEntry } from '../types/OverlayPass'
 
 export class OverlayRenderPass implements RenderPass {
   public readonly name = 'OverlayPass'
