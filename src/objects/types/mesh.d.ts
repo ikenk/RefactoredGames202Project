@@ -1,4 +1,27 @@
 /**
+ * 通用 Mesh Renderer 当前支持的内置顶点属性名称。
+ */
+export type BuiltInVertexAttributeName =
+  | 'aVertexPosition'
+  | 'aNormalPosition'
+  | 'aTextureCoord'
+  | 'aTangent'
+  | 'aColor'
+
+/**
+ * PRT Shader 当前支持的 transport SH 顶点属性名称。
+ *
+ * order 2 使用 SH0...2；
+ * order 3 使用 SH0...3。
+ */
+export type SHTransportAttributeName = `aTransportSH${0 | 1 | 2 | 3}`
+
+/**
+ * 当前渲染引擎允许传入 Mesh 的全部顶点属性名称。
+ */
+export type VertexAttributeName = BuiltInVertexAttributeName | SHTransportAttributeName
+
+/**
  * 顶点属性数据描述。
  *
  * 用于描述一个 Vertex Attribute 的数据布局，
@@ -24,7 +47,7 @@ export interface AttributeData {
    * attribute vec3 aVertexPosition;
    * ```
    */
-  name: 'aVertexPosition' | 'aNormalPosition' | 'aTextureCoord' | 'aTangent' | 'aColor'
+  name: VertexAttributeName
   /**
    * 实际的顶点数据。
    *

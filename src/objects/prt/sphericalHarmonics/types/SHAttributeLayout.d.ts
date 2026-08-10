@@ -1,3 +1,5 @@
+import type { SHTransportAttributeName } from '@/objects/types/Mesh'
+
 /**
  * 描述一组 SH 系数如何拆分成 vertex attributes
  *
@@ -18,8 +20,11 @@
  */
 
 export interface SHAttributeGroup {
-  name: string // attribute 名称，需与 shader 一致
-  size: number // 每组的系数个数（2 | 3 | 4），对应 vec2/vec3/vec4
+  /** 与 PRT Shader 中声明的 transport attribute 名称一致。 */
+  name: SHTransportAttributeName
+
+  /** 每组的系数个数，对应 GLSL vec2、vec3 或 vec4。 */
+  size: number
 }
 
 export type SHAttributeLayout = SHAttributeGroup[]

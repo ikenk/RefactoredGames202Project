@@ -1,9 +1,9 @@
 import { Mesh } from '@/objects/Mesh'
 import { Transform } from '@/objects/utils/Transform'
-import { AttributeData } from '@/objects/types/Mesh'
+import type { AttributeData } from '@/objects/types/Mesh'
 import type { PRTData } from '@/loaders/loadPRTSHTxt'
 import { MeshValidationError } from '@/errors/EngineError/MeshError/MeshValidationError'
-import { SHAttributeLayout } from './types/SHAttributeLayout'
+import type { SHAttributeLayout } from './types/SHAttributeLayout'
 
 /**
  * 用 OBJ 的面展开位置 + PRT 的 transport SH 创建 Mesh
