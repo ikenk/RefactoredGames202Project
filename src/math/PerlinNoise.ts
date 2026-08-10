@@ -1,4 +1,4 @@
-class PerlinNoise {
+export class PerlinNoise {
   private perm: number[] = []
 
   constructor() {
@@ -23,6 +23,20 @@ class PerlinNoise {
     return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v)
   }
 
+  /**
+   * 在 256 项排列表中进行周期读取，并把构造阶段建立的完整性不变量收口到一处。
+   */
+  private permutationAt(index: number): number {
+    const wrappedIndex = index & 255
+    const value = this.perm[wrappedIndex]
+
+    if (value === undefined) {
+      throw new RangeError(`[PerlinNoise] permutation index ${wrappedIndex} is not initialized`)
+    }
+
+    return value
+  }
+
   noise(x: number, y: number): number {
     const X = Math.floor(x) & 255
     const Y = Math.floor(y) & 255
@@ -33,20 +47,24 @@ class PerlinNoise {
     const u = this.fade(x)
     const v = this.fade(y)
 
-    const A = this.perm[X] + Y
-    const AA = this.perm[A & 255]
-    const AB = this.perm[(A + 1) & 255]
-    const B = this.perm[(X + 1) & 255] + Y
-    const BA = this.perm[B & 255]
-    const BB = this.perm[(B + 1) & 255]
+    const A = this.permutationAt(X) + Y
+    const AA = this.permutationAt(A)
+    const AB = this.permutationAt(A + 1)
+    const B = this.permutationAt(X + 1) + Y
+    const BA = this.permutationAt(B)
+    const BB = this.permutationAt(B + 1)
 
     return this.lerp(
       v,
-      this.lerp(u, this.grad(this.perm[AA & 255], x, y), this.grad(this.perm[BA & 255], x - 1, y)),
       this.lerp(
         u,
-        this.grad(this.perm[AB & 255], x, y - 1),
-        this.grad(this.perm[BB & 255], x - 1, y - 1)
+        this.grad(this.permutationAt(AA), x, y),
+        this.grad(this.permutationAt(BA), x - 1, y)
+      ),
+      this.lerp(
+        u,
+        this.grad(this.permutationAt(AB), x, y - 1),
+        this.grad(this.permutationAt(BB), x - 1, y - 1)
       )
     )
   }
