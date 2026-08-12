@@ -2,6 +2,7 @@
 claude-*
 .claude
 codex-*
+.agents/
 
 # deprecated
 deprecated/

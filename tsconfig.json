@@ -2,7 +2,15 @@
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+      // 不在主线程 TypeScript program 中同时启用 "WebWorker"：
+      // DOM 与 WebWorker 会重复声明 self、location、navigator、onmessage 等全局名称。
+      // 将来新增 *.worker.ts 时，应在独立 tsconfig.worker.json 中启用 "WebWorker"。
+      // "WebWorker"
+    ],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
@@ -13,7 +21,7 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "skipLibCheck": true,
+    "skipLibCheck": false,
     "forceConsistentCasingInFileNames": true,
     "types": ["vite/client"],
     "paths": {

@@ -1,5 +1,4 @@
-import type { mat3, mat4 } from 'gl-matrix'
-import type { UpdatedParamters } from '@/types/MeshRender'
+import type { mat4 } from 'gl-matrix'
 import { Vec3 } from '@/math/types/math'
 
 // ============================================================

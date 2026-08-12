@@ -1,6 +1,4 @@
 import { Vec3 } from '@/math/types/math'
-import { TransformationParams } from '../types/transformation'
-// import { Transformation } from '@/objects/types/transformation'
 
 export class Transform {
   private _translation: Vec3
@@ -48,55 +46,5 @@ export class Transform {
     this._scale[0] = v[0]
     this._scale[1] = v[1]
     this._scale[2] = v[2]
-  }
-}
-
-// =============== Deprecated ===============
-// export class TRSTransform implements Transformation {
-//   public readonly translate: Vec3
-//   public readonly scale: Vec3
-//   public readonly rotate: Vec3
-
-//   constructor(translate: Vec3 = [0, 0, 0], scale: Vec3 = [1, 1, 1], rotate: Vec3 = [0, 0, 0]) {
-//     this.translate = translate
-//     this.scale = scale
-//     this.rotate = rotate
-//   }
-// }
-
-// =============== old & will Deprecated ===============
-export class Transformation {
-  public translate: Vec3
-  public rotate: Vec3
-  public scale: Vec3
-
-  constructor(translate: Vec3 = [0, 0, 0], rotate: Vec3 = [0, 0, 0], scale: Vec3 = [1, 1, 1]) {
-    this.translate = translate
-    this.rotate = rotate
-    this.scale = scale
-  }
-
-  static createTransformationParams(
-    t_x: number = 0,
-    t_y: number = 0,
-    t_z: number = 0,
-    r_x: number = 0,
-    r_y: number = 0,
-    r_z: number = 0,
-    s_x: number = 1,
-    s_y: number = 1,
-    s_z: number = 1
-  ): TransformationParams {
-    return {
-      modelTransX: t_x,
-      modelTransY: t_y,
-      modelTransZ: t_z,
-      modelScaleX: s_x,
-      modelScaleY: s_y,
-      modelScaleZ: s_z,
-      modelRotateX: r_x,
-      modelRotateY: r_y,
-      modelRotateZ: r_z
-    }
   }
 }

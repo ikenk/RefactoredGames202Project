@@ -1,3 +1,4 @@
+import { Vec2 } from '@/math/types/math'
 import { WaterMaterialConfig } from './WaterMaterialConfig'
 
 export interface GerstnerWaveParams {

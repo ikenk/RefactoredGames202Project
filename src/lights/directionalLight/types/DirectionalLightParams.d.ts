@@ -1,4 +1,4 @@
-import { ShadowConfig } from '@/lights/shadow/types/shadow'
+import type { ShadowConfig } from '@/renderers/passes/shadow/types/shadow'
 import { Vec3 } from '@/math/types/math'
 
 /**

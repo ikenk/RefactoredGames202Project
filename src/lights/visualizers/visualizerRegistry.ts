@@ -1,7 +1,5 @@
-import { MeshRenderer } from '@/renderers/MeshRenderer'
 import { ILight } from '../types/light'
-
-type VisualizerFactory = (gl: WebGLRenderingContext, light: ILight) => Promise<MeshRenderer>
+import { VisualizerFactory } from './types/visualizer'
 
 const registry = new Map<string, VisualizerFactory>()
 

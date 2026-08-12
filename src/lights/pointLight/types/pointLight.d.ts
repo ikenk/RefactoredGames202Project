@@ -1,4 +1,4 @@
-import { IPointShadow } from '@/lights/shadow/types/shadow'
+// import { IPointShadow } from '@/lights/shadow/types/shadow'
 import { ILight } from '@/lights/types/light'
 import { Vec3 } from '@/math/types/math'
 
