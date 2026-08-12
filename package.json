@@ -27,7 +27,7 @@
   },
   "lint-staged": {
     "src/**/*.{js,ts}": [
-      "eslint --max-warnings 30",
+      "eslint --max-warnings 10",
       "prettier --check"
     ],
     "src/**/*.{json,css,html}": [
