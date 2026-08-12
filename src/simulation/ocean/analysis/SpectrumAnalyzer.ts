@@ -1,5 +1,4 @@
 import { Spectrum } from '../spectrums/Spectrum'
-import { OceanParams } from '../fft/types/OceanParams'
 import { SpectrumReport } from './types/SpectrumAnalyzer'
 import { SpectrumEvaluationContext } from '../spectrums/types/SpectrumEvaluationContext'
 import { FFTGridConfig } from '../fft/types/FFTGridConfig'

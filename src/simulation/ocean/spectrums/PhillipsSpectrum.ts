@@ -1,4 +1,3 @@
-// import { OceanParams } from '../fft/types/OceanParams'
 import type { Spectrum } from './Spectrum'
 import type { ResolvedPhillipsSpectrumConfig } from './types/PhillipsSpectrumConfig'
 import type { SpectrumEvaluationContext } from './types/SpectrumEvaluationContext'

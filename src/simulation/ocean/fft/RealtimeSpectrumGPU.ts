@@ -1,6 +1,5 @@
 import { FBO } from '@/framebuffers/FBO'
 import { Shader } from '@/shaders/Shader'
-import { OceanParams } from './types/OceanParams'
 import { InitialSpectrum } from './InitialSpectrum'
 import { FullScreenQuad } from '@/objects/FullScreenQuad'
 import { ComplexBuffer } from './ComplexBuffer'

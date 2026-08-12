@@ -56,8 +56,6 @@ export function createSpectrum(config: SpectrumModelConfig): Spectrum {
   }
 }
 
-//
-
 /**
  * 创建按 cascade 层工作的 Spectrum 工厂。
  *
@@ -173,42 +171,6 @@ export function createCapillarySpectrum(config: CapillarySpectrumConfig): Capill
 }
 
 // ==================== helper ====================
-// function validateEvaluationContext(params: OceanParams): void {
-//   requirePositive(params.size, 'size')
-//   requirePositive(params.gravity, 'gravity')
-
-//   if (params.depth !== undefined) requirePositive(params.depth, 'depth')
-//   if (params.kMin !== undefined) requireNonNegative(params.kMin, 'kMin')
-//   if (params.kMax !== undefined) requirePositive(params.kMax, 'kMax')
-
-//   if (params.kMin !== undefined && params.kMax !== undefined && params.kMin >= params.kMax) {
-//     throw new RangeError(
-//       `[SpectrumFactory] kMin must be less than kMax; received ${params.kMin} >= ${params.kMax}`
-//     )
-//   }
-// }
-// function validateEvaluationContext(context: SpectrumEvaluationContext): void {
-//   requirePositive(context.size, 'size')
-//   requirePositive(context.gravity, 'gravity')
-
-//   if (context.depth !== undefined) {
-//     requirePositive(context.depth, 'depth')
-//   }
-
-//   if (context.kMin !== undefined) {
-//     requireNonNegative(context.kMin, 'kMin')
-//   }
-
-//   if (context.kMax !== undefined) {
-//     requirePositive(context.kMax, 'kMax')
-//   }
-
-//   if (context.kMin !== undefined && context.kMax !== undefined && context.kMin >= context.kMax) {
-//     throw new RangeError(
-//       `[SpectrumFactory] kMin must be less than kMax; received ${context.kMin} >= ${context.kMax}`
-//     )
-//   }
-// }
 
 function requireDefined<T>(value: T | undefined, path: string): T {
   if (value === undefined) {

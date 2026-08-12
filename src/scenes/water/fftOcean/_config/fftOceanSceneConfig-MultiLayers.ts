@@ -2,7 +2,6 @@ import { FFT_OCEAN_MATERIAL_DEFAULTS } from '@/materials/water/_config/defaults'
 import { Transform } from '@/objects/utils/Transform'
 import { FFTOceanConfig } from '../types/FFTOceanConfig-MultiLayers'
 import { FFTOceanMaterialConfig } from '@/materials/water/types/FFTOceanMaterialConfig'
-import { LineRenderMode } from '@/renderers/types/LineRenderMode'
 
 /**
  * FFTOceanScene（multi-layers / cascade=4）的场景配置。
@@ -14,8 +13,8 @@ import { LineRenderMode } from '@/renderers/types/LineRenderMode'
  *      → 对应 material：FFTOceanMaterial-MultiLayers.ts
  *
  *   2. DEFAULT_FFT_OCEAN_CONFIG — 完整的 FFTOceanConfig：
- *      Mesh + Material + Renderer + FFT cascade（4 层）。
- *      ⚠️ oceanParamsCascade 的长度若 > 4，多余层会被 shader 忽略。
+ *      Mesh + Material + Renderer + FFT layer authoring config（4 层）。
+ *      ⚠️ layers 的长度若 > 4，多余层会被 shader 忽略。
  *
  * 物理量单位约定：
  *   - 长度 / size / fetch：米
@@ -127,7 +126,7 @@ export const DEFAULT_FFT_OCEAN_CONFIG: FFTOceanConfig = {
 
   // ==================== FFT Calculate ====================
   /**
-   * 4 层级联（cascade）的频谱参数。
+   * 4 层级联（cascade）的可编辑配置。
    *
    * 物理动机：单层 FFT 的 (size, fftResolution) 决定了它能表达的波长范围
    *   k_min ≈ 2π / size，k_max ≈ π · fftResolution / size。
@@ -138,163 +137,207 @@ export const DEFAULT_FFT_OCEAN_CONFIG: FFTOceanConfig = {
    *   Layer 2 (size= 16) — 短波 / chop           λ_peak ~  2-6   m
    *   Layer 3 (size=  4) — 毛细波 / ripple       λ_peak ~  0.3-1 m
    *
-   * 每层 kMin/kMax 用于硬切窗口避免跨层重复（避免低频被高分辨率层重复合成）。
-   *
-   * ⚠️ 若 oceanParamsCascade.length > 4，多出的层会被 shader 忽略。
+   * 每层 evaluation.kMin/kMax 用于硬切窗口，避免跨层频率重复。
+   * ⚠️ 若 layers.length > 4，多出的层仍会被当前 shader 忽略。
    */
-  oceanParamsCascade: [
+  layers: [
     // ----- Layer 0：主涌浪 (size=256) -----
     {
-      size: 256,
-      fftResolution: 512,
-      gravity: 9.81,
-      depth: 1000,
-      amplitude: 1.3,
-      layerContribute: 0.95,
-      choppiness: [1.2, 1.2],
-      kMin: 0.025,
-      kMax: 0.25,
-      foamBias: 0.15,
-      foamAdd: 0.07,
-      foamDecayRate: 0.07,
-      foamPower: 1.5,
-      // ----- spectrum0/1：双方向风谱叠加，制造方向多样性 -----
-      // windSpeed↑ + ωp↓ → α↑ → 整体能量近似指数增长；波变高也变长
-      // fetch    ↑ → α↑ + ωp↓（弱于风速）→ 模拟 "远海 vs 近岸"
-      // peakEnhancement(γ)↑ → 频带变窄 → swell 形态；↓ → wind-sea 多尺度
-      // spreadBlend ∈ [0,1]：0 = 各向同性，1 = 完全沿风向（cos²ˢ 峰）
-      // swell ∈ [0,1]：低频方向的额外集中度（s ≈ 50+），主要影响长涌浪
-      // shortWavesFade(f)：exp(-f²k²) 衰减；f↑ → 杀掉短波 → 海面变光滑
-      spectrum0: {
-        scale: 0.75,
-        windSpeed: 10,
-        windDirection: 0,
-        fetch: 150000,
-        spreadBlend: 0.15,
-        swell: 0.3,
-        peakEnhancement: 3.3,
-        shortWavesFade: 0.5
+      grid: {
+        size: 256,
+        fftResolution: 512
       },
-      spectrum1: {
-        scale: 0.75,
-        windSpeed: 10,
-        windDirection: 90, // 主风向 +90°，制造交叉涌浪
-        fetch: 100000,
-        spreadBlend: 0.15,
-        swell: 0.3,
-        peakEnhancement: 3.3,
-        shortWavesFade: 0.5
+      evaluation: {
+        gravity: 9.81,
+        depth: 1000,
+        kMin: 0.025,
+        kMax: 0.25
+      },
+      spectrum: {
+        model: 'jonswap',
+        primary: {
+          scale: 0.75,
+          windSpeed: 10,
+          windDirection: 0,
+          fetch: 150000,
+          spreadBlend: 0.15,
+          swell: 0.3,
+          peakEnhancement: 3.3,
+          shortWavesFade: 0.5
+        },
+        secondary: {
+          scale: 0.75,
+          windSpeed: 10,
+          windDirection: 90,
+          fetch: 100000,
+          spreadBlend: 0.15,
+          swell: 0.3,
+          peakEnhancement: 3.3,
+          shortWavesFade: 0.5
+        }
+      },
+      initialSpectrum: {
+        amplitude: 1.3
+      },
+      runtime: {
+        choppiness: [1.2, 1.2],
+        foamBias: 0.15,
+        foamAdd: 0.07,
+        foamDecayRate: 0.07,
+        foamPower: 1.5
+      },
+      blend: {
+        layerContribute: 0.95
       }
     },
 
     // ----- Layer 1：风浪 (size=64) -----
     {
-      size: 64,
-      fftResolution: 512,
-      gravity: 9.81,
-      depth: 1000,
-      amplitude: 1.1,
-      layerContribute: 0.75,
-      choppiness: [1.9, 1.9],
-      kMin: 0.001,
-      kMax: 2.1,
-      foamBias: 0.08,
-      foamAdd: 0.08,
-      foamDecayRate: 0.08,
-      foamPower: 1.5,
-      spectrum0: {
-        scale: 0.65,
-        windSpeed: 7,
-        windDirection: 270,
-        fetch: 50000,
-        spreadBlend: 0.15,
-        swell: 0,
-        peakEnhancement: 3.3,
-        shortWavesFade: 0.05
+      grid: {
+        size: 64,
+        fftResolution: 512
       },
-      spectrum1: {
-        scale: 0.65,
-        windSpeed: 6,
-        windDirection: 180,
-        fetch: 60000,
-        spreadBlend: 0.15,
-        swell: 0,
-        peakEnhancement: 3.3,
-        shortWavesFade: 0.05
+      evaluation: {
+        gravity: 9.81,
+        depth: 1000,
+        kMin: 0.001,
+        kMax: 2.1
+      },
+      spectrum: {
+        model: 'jonswap',
+        primary: {
+          scale: 0.65,
+          windSpeed: 7,
+          windDirection: 270,
+          fetch: 50000,
+          spreadBlend: 0.15,
+          swell: 0,
+          peakEnhancement: 3.3,
+          shortWavesFade: 0.05
+        },
+        secondary: {
+          scale: 0.65,
+          windSpeed: 6,
+          windDirection: 180,
+          fetch: 60000,
+          spreadBlend: 0.15,
+          swell: 0,
+          peakEnhancement: 3.3,
+          shortWavesFade: 0.05
+        }
+      },
+      initialSpectrum: {
+        amplitude: 1.1
+      },
+      runtime: {
+        choppiness: [1.9, 1.9],
+        foamBias: 0.08,
+        foamAdd: 0.08,
+        foamDecayRate: 0.08,
+        foamPower: 1.5
+      },
+      blend: {
+        layerContribute: 0.75
       }
     },
 
     // ----- Layer 2：短波 / chop (size=16) -----
     {
-      size: 16,
-      fftResolution: 512,
-      gravity: 9.81,
-      depth: 1000,
-      amplitude: 0.8,
-      layerContribute: 0.6,
-      choppiness: [2.3, 2.3],
-      kMin: 0.025,
-      kMax: 9.0,
-      foamBias: 0.07,
-      foamAdd: 0.03,
-      foamDecayRate: 0.08,
-      foamPower: 1.5,
-      spectrum0: {
-        scale: 0.6,
-        windSpeed: 4.5,
-        windDirection: 90,
-        fetch: 2200,
-        spreadBlend: 0.1,
-        swell: 0.1,
-        peakEnhancement: 3.3,
-        shortWavesFade: 0.03
+      grid: {
+        size: 16,
+        fftResolution: 512
       },
-      spectrum1: {
-        scale: 0.3,
-        windSpeed: 4.0,
-        windDirection: 180,
-        fetch: 1500,
-        spreadBlend: 0.1,
-        swell: 0.15,
-        peakEnhancement: 3.3,
-        shortWavesFade: 0.03
+      evaluation: {
+        gravity: 9.81,
+        depth: 1000,
+        kMin: 0.025,
+        kMax: 9
+      },
+      spectrum: {
+        model: 'jonswap',
+        primary: {
+          scale: 0.6,
+          windSpeed: 4.5,
+          windDirection: 90,
+          fetch: 2200,
+          spreadBlend: 0.1,
+          swell: 0.1,
+          peakEnhancement: 3.3,
+          shortWavesFade: 0.03
+        },
+        secondary: {
+          scale: 0.3,
+          windSpeed: 4,
+          windDirection: 180,
+          fetch: 1500,
+          spreadBlend: 0.1,
+          swell: 0.15,
+          peakEnhancement: 3.3,
+          shortWavesFade: 0.03
+        }
+      },
+      initialSpectrum: {
+        amplitude: 0.8
+      },
+      runtime: {
+        choppiness: [2.3, 2.3],
+        foamBias: 0.07,
+        foamAdd: 0.03,
+        foamDecayRate: 0.08,
+        foamPower: 1.5
+      },
+      blend: {
+        layerContribute: 0.6
       }
     },
 
     // ----- Layer 3：毛细波 / ripple (size=4) -----
     {
-      size: 4,
-      fftResolution: 512,
-      gravity: 9.81,
-      depth: 1000,
-      amplitude: 0.7,
-      layerContribute: 0.35,
-      choppiness: [2.8, 2.8],
-      kMin: 12.5,
-      kMax: 45,
-      foamBias: 0.1,
-      foamAdd: 0.0,
-      foamDecayRate: 0.05,
-      foamPower: 1.5,
-      spectrum0: {
-        scale: 0.45,
-        windSpeed: 3.0,
-        windDirection: 135,
-        fetch: 320,
-        spreadBlend: 0.5,
-        swell: 0.1,
-        peakEnhancement: 3.3,
-        shortWavesFade: 0.001
+      grid: {
+        size: 4,
+        fftResolution: 512
       },
-      spectrum1: {
-        scale: 0.15,
-        windSpeed: 2.5,
-        windDirection: 225,
-        fetch: 220,
-        spreadBlend: 0.5,
-        swell: 0.08,
-        peakEnhancement: 3.3,
-        shortWavesFade: 0.001
+      evaluation: {
+        gravity: 9.81,
+        depth: 1000,
+        kMin: 12.5,
+        kMax: 45
+      },
+      spectrum: {
+        model: 'jonswap',
+        primary: {
+          scale: 0.45,
+          windSpeed: 3,
+          windDirection: 135,
+          fetch: 320,
+          spreadBlend: 0.5,
+          swell: 0.1,
+          peakEnhancement: 3.3,
+          shortWavesFade: 0.001
+        },
+        secondary: {
+          scale: 0.15,
+          windSpeed: 2.5,
+          windDirection: 225,
+          fetch: 220,
+          spreadBlend: 0.5,
+          swell: 0.08,
+          peakEnhancement: 3.3,
+          shortWavesFade: 0.001
+        }
+      },
+      initialSpectrum: {
+        amplitude: 0.7
+      },
+      runtime: {
+        choppiness: [2.8, 2.8],
+        foamBias: 0.1,
+        foamAdd: 0,
+        foamDecayRate: 0.05,
+        foamPower: 1.5
+      },
+      blend: {
+        layerContribute: 0.35
       }
     }
   ]

@@ -6,7 +6,7 @@ import type { Pane } from 'tweakpane'
 import { useTiering } from './hooks/useTiering'
 import { usePersistence } from './hooks/usePersistence'
 import { usePresets } from './hooks/usePresets'
-import type { FFTOceanGUIDeps } from '../types/setup-v4'
+import type { FFTOceanGUIDeps } from '@/gui/fftOcean/types/setup-v4'
 import {
   ControlDescriptor,
   HOT_TUNING_DESCRIPTORS,
@@ -18,7 +18,7 @@ import {
   buildLayerDescriptors
 } from './descriptors'
 
-const STORAGE_KEY = 'fftOcean.gui.v4.snapshot'
+const STORAGE_KEY = 'fftOcean.gui.v5.snapshot'
 const LAYER_LABELS = ['主涌浪', '风浪', '短波', '毛细波'] as const
 
 interface SectionSpec {
@@ -47,13 +47,13 @@ export function setupFFTOceanGUI(pane: Pane, deps: FFTOceanGUIDeps): Pane {
   })
 
   const layerDescriptors: ControlDescriptor[][] = []
-  deps.config.oceanParamsCascade.forEach((layer, i) => {
+  deps.config.layers.forEach((layer, i) => {
     const label = LAYER_LABELS[i] ?? ''
     const lf = pane.addFolder({
-      title: `📐 Layer ${i} (size=${layer.size}, ${label})`,
+      title: `📐 Layer ${i} (size=${layer.grid.size}, ${label})`,
       expanded: i === 0
     })
-    const descs = buildLayerDescriptors(i)
+    const descs = buildLayerDescriptors(i, layer.spectrum.model)
     layerDescriptors.push(descs)
     descs.forEach((d) => tiering.addControl(lf, d, persistence.markDirty))
   })

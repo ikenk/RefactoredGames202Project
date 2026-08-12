@@ -7,7 +7,7 @@ import type { InitialSpectrumConfig } from './InitialSpectrumConfig'
  * 创建单层 FFT Ocean CPU 初始数据所需的窄输入。
  *
  * 该接口只包含 InitialSpectrum 和后续 GPU 计算真正需要的数据，
- * 不暴露场景层使用的完整 OceanParams。
+ * 不暴露场景和 GUI 持有的完整可编辑配置。
  */
 export interface FFTOceanLayerPreparationInput {
   /**

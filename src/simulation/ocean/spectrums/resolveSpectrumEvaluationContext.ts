@@ -3,7 +3,7 @@ import type { SpectrumEvaluationContext } from './types/SpectrumEvaluationContex
 /**
  * 校验并复制一层波谱求值环境。
  *
- * 返回新对象，避免 Spectrum 创建完成后继续依赖可变的 OceanParams。
+ * 返回新对象，避免 Spectrum 求值阶段继续依赖场景和 GUI 持有的可变配置。
  */
 export function resolveSpectrumEvaluationContext(
   context: SpectrumEvaluationContext

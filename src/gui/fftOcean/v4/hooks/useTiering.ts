@@ -14,7 +14,7 @@
 import type { Pane, FolderApi } from 'tweakpane'
 import { UniformEntry, UniformType } from '@/materials/types/Material'
 import type { Vec3 } from '@/math/types/math'
-import type { FFTOceanGUIDeps } from '../../types/setup-v4'
+import type { FFTOceanGUIDeps } from '@/gui/fftOcean/types/setup-v4'
 import type {
   ControlDescriptor,
   T1Descriptor,
@@ -38,7 +38,7 @@ type Container = Pane | FolderApi
 
 export function useTiering(deps: FFTOceanGUIDeps) {
   const mat = deps.config.materialConfig as Record<string, unknown>
-  const cascade = deps.config.oceanParamsCascade
+  const layers = deps.config.layers
 
   function dispatchT1(d: T1Descriptor, v: number | Vec3): void {
     deps.oceanRenderer.updateMaterialUniforms({
@@ -53,9 +53,9 @@ export function useTiering(deps: FFTOceanGUIDeps) {
   }
 
   function dispatchT2Choppiness(d: T2ChoppinessDescriptor): void {
-    const layer = cascade[d.layerIndex]
-    if (!layer?.choppiness) return
-    deps.computePass.setLayerChoppiness(d.layerIndex, layer.choppiness)
+    const layer = layers[d.layerIndex]
+    if (!layer) return
+    deps.computePass.setLayerChoppiness(d.layerIndex, layer.runtime.choppiness)
   }
 
   // function dispatchT2Foam(d: T2FoamDescriptor, v: number): void {
@@ -72,7 +72,7 @@ export function useTiering(deps: FFTOceanGUIDeps) {
   }
 
   function dispatchT3Spectrum(d: T3SpectrumDescriptor): void {
-    const layer = cascade[d.layerIndex]
+    const layer = layers[d.layerIndex]
     if (!layer) return
     // deps.computePass.rebuildLayerSpectrum(d.layerIndex, layer, deps.spectrum)
     deps.rebuildLayerSpectrum(d.layerIndex)
@@ -101,35 +101,56 @@ export function useTiering(deps: FFTOceanGUIDeps) {
       case 'T1':
         return { target: mat, key: d.key }
       case 'T2-contribute': {
-        const layer = cascade[d.layerIndex]
+        const layer = layers[d.layerIndex]
         if (!layer) return null
-        return { target: layer as unknown as Record<string, unknown>, key: 'layerContribute' }
+        return {
+          target: layer.blend as unknown as Record<string, unknown>,
+          key: 'layerContribute'
+        }
       }
       case 'T2-choppiness': {
-        const layer = cascade[d.layerIndex]
+        const layer = layers[d.layerIndex]
         if (!layer) return null
-        if (!layer.choppiness) layer.choppiness = [1, 1]
         return {
-          target: layer.choppiness as unknown as Record<string, unknown>,
+          target: layer.runtime.choppiness as unknown as Record<string, unknown>,
           key: String(d.axis)
         }
       }
       case 'T2-foam': {
-        const layer = cascade[d.layerIndex]
+        const layer = layers[d.layerIndex]
         if (!layer) return null
-        return { target: layer as unknown as Record<string, unknown>, key: d.key }
+        return { target: layer.runtime as unknown as Record<string, unknown>, key: d.key }
       }
       case 'T3-spectrum': {
-        const layer = cascade[d.layerIndex]
+        const layer = layers[d.layerIndex]
         if (!layer) return null
-        if (d.scope) {
-          const sp = (layer as unknown as Record<string, unknown>)[d.scope] as
-            | Record<string, unknown>
-            | undefined
-          if (!sp) return null
-          return { target: sp, key: d.key }
+
+        switch (d.targetGroup) {
+          case 'initialSpectrum':
+            return {
+              target: layer.initialSpectrum as unknown as Record<string, unknown>,
+              key: d.key
+            }
+          case 'evaluation':
+            return {
+              target: layer.evaluation as unknown as Record<string, unknown>,
+              key: d.key
+            }
+          case 'spectrum-primary':
+            if (layer.spectrum.model !== 'jonswap') return null
+            return {
+              target: layer.spectrum.primary as unknown as Record<string, unknown>,
+              key: d.key
+            }
+          case 'spectrum-secondary':
+            if (layer.spectrum.model !== 'jonswap' || layer.spectrum.secondary === undefined) {
+              return null
+            }
+            return {
+              target: layer.spectrum.secondary as unknown as Record<string, unknown>,
+              key: d.key
+            }
         }
-        return { target: layer as unknown as Record<string, unknown>, key: d.key }
       }
     }
   }

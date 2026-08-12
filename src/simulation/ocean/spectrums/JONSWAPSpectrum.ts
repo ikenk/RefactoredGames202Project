@@ -1,4 +1,3 @@
-// import { OceanParams } from '../fft/types/OceanParams'
 import type { Spectrum } from './Spectrum'
 import type { JONSWAPSpectrumConfig } from './types/JONSWAPSpectrumConfig'
 import type { SpectrumSettings } from './types/SpectrumSettings'

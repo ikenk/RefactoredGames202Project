@@ -1,51 +1,30 @@
-import { FFTOceanMaterialConfig } from '@/materials/water/types/FFTOceanMaterialConfig'
-import { Transform } from '@/objects/utils/Transform'
-import { OceanParams } from '@/simulation/ocean/fft/types/OceanParams'
-import { RenderingMode } from '../../types/RenderingMode'
+import type { FFTOceanMaterialConfig } from '@/materials/water/types/FFTOceanMaterialConfig'
+import type { Transform } from '@/objects/utils/Transform'
+import type { RenderingMode } from '@/scenes/water/types/RenderingMode'
+import type { FFTOceanLayerAuthoringConfig } from './FFTOceanLayerAuthoringConfig'
 
-/**
- * FFT 海洋渲染器的完整配置（重构版 · 单层）
- *
- * 变更点（对比原 FFTOceanRenderManagerConfig）：
- * - 去掉了 CascadeConfig（含 blendMode, enabled, layerParamsSet[]）
- * - 替换为 OceanParams（单层参数）
- * - renderingMode 提升为顶层字段（原来嵌套在 CascadeConfig 里）
- */
-// export interface FFTOceanConfig {
-//   // ==================== Mesh ====================
-//   /** 模型变换 */
-//   transform: Transform
-//   /** mesh 物理尺寸（通常 = oceanParams.size） */
-//   surfaceSize: number
-//   /** mesh 顶点密度（一定要和 oceanParams 中的 fftResolution(Texture Resolution) 区分开） */
-//   surfaceMeshResolution: number
-//   // ==================== Material ====================
-//   /** 材质参数 */
-//   // materialParams: FFTOceanMaterialParams
-//   materialConfig: FFTOceanMaterialConfig
-//   // ==================== Renderer ====================
-//   /** 渲染模式 */
-//   renderingMode: RenderingMode
-//   // ==================== FFT Calculate ====================
-//   /** 海洋物理参数（单层） -- 纯频谱参数（给 FFT 计算用）*/
-//   oceanParams: OceanParams
-// }
+/** FFT Ocean 整个场景的可编辑配置。 */
 export interface FFTOceanConfig {
-  // ==================== Mesh ====================
   /** 模型变换 */
   transform: Transform
-  /** mesh 物理尺寸（通常 = oceanParams.size） */
+
+  /** 屏幕上海面 mesh 的物理边长，单位 m。 */
   surfaceSize: number
-  /** mesh 顶点密度（一定要和 oceanParams 中的 fftResolution(Texture Resolution) 区分开） */
+
+  /** mesh 顶点密度；与各层 FFT 纹理分辨率相互独立。 */
   surfaceMeshResolution: number
-  // ==================== Material ====================
-  /** 材质参数 */
-  // materialParams: FFTOceanMaterialParams
+
+  /** 最终水面材质的可编辑参数。 */
   materialConfig: FFTOceanMaterialConfig
-  // ==================== Renderer ====================
+
   /** 渲染模式 */
   renderingMode: RenderingMode
-  // ==================== FFT Calculate ====================
-  /** 海洋物理参数（单层） -- 纯频谱参数（给 FFT 计算用） */
-  oceanParamsCascade: OceanParams[]
+
+  /**
+   * 按低频到高频排列的 FFT cascade authoring live state。
+   *
+   * Scene、GUI 和持久化可以修改这些对象；开始初始化或冷重建时，必须先通过
+   * `createFFTOceanLayerBuildInputs()` 生成复制且收窄的底层输入。
+   */
+  layers: FFTOceanLayerAuthoringConfig[]
 }

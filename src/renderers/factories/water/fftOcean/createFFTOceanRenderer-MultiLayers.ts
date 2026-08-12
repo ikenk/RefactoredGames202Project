@@ -46,14 +46,8 @@ export async function createFFTOceanRenderer(
   gl: WebGLRenderingContext,
   config: FFTOceanConfig
 ): Promise<BaseRenderer> {
-  const {
-    surfaceSize,
-    surfaceMeshResolution,
-    materialConfig,
-    transform,
-    renderingMode,
-    oceanParamsCascade
-  } = config
+  const { surfaceSize, surfaceMeshResolution, materialConfig, transform, renderingMode, layers } =
+    config
 
   const ctx = '[createFFTOceanRenderer]'
   const rendererName = 'FFTOceanRenderer'
@@ -68,7 +62,7 @@ export async function createFFTOceanRenderer(
   //   oceanParamsCascade,
   //   materialConfig
   // )
-  const layerBlendConfigs = createFFTOceanLayerBlendConfigs(oceanParamsCascade)
+  const layerBlendConfigs = createFFTOceanLayerBlendConfigs(layers.map((layer) => layer.blend))
 
   const material = new FFTOceanMaterial(
     `${ctx} FFTOceanMaterial<${rendererName}>`,

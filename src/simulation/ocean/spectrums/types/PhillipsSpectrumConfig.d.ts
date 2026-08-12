@@ -18,8 +18,8 @@ export interface PhillipsWindDirection {
  * `amplitude` 和 `opposingWaveDamping` 是工程调参项，可以由工厂采用项目预设。
  *
  * 注意：这里的 `amplitude` 是 Phillips 谱公式中的 A，不是
- * `OceanParams.amplitude`。后者是 InitialSpectrum 生成结果的全局线性缩放，
- * 两者不能混为同一个字段，否则会发生重复放大。
+ * `InitialSpectrumConfig.amplitude`。后者是 InitialSpectrum 生成结果的全局
+ * 线性缩放，两者不能混为同一个字段，否则会发生重复放大。
  */
 export interface PhillipsSpectrumConfig {
   /** 海面上方 10 m 的风速 U，单位 m/s，必须大于 0。 */

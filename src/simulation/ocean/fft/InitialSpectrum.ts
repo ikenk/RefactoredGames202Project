@@ -3,7 +3,6 @@ import { SpectrumEvaluationContext } from '../spectrums/types/SpectrumEvaluation
 import { ComplexBuffer } from './ComplexBuffer'
 import { FFTGridConfig } from './types/FFTGridConfig'
 import { InitialSpectrumConfig } from './types/InitialSpectrumConfig'
-import { OceanParams } from './types/OceanParams'
 
 /**
  * 初始频谱 h₀(k) 和 h₀*(-k) 生成器

@@ -5,13 +5,14 @@
 
 ## 版本索引
 
-| 目录 | 主要变化 | 状态 |
-|---|---|---|
-| `single-layer-v1/` | 单层 OceanParams、CPU 时变频谱、GPU Stockham IFFT | 冻结阅读参考 |
-| `multi-layer-v1/` | 引入 cascade 的早期场景与 ComputePass 里程碑 | 冻结阅读参考 |
-| `multi-layer-v2/` | CPU RealtimeSpectrum v2、packed assembly、IBL、dat.GUI v1 | 冻结阅读参考 |
-| `multi-layer-v3/` | GPU RealtimeSpectrum、泡沫、descriptor/hooks、dat.GUI v3 | 冻结阅读参考 |
-| `_shared/` | 被多个历史版本共同使用的 CPU 频谱与 Shader 备份 | 冻结共享参考 |
+| 目录                                 | 主要变化                                                  | 状态         |
+| ------------------------------------ | --------------------------------------------------------- | ------------ |
+| `single-layer-v1/`                   | 单层 OceanParams、CPU 时变频谱、GPU Stockham IFFT         | 冻结阅读参考 |
+| `multi-layer-v1/`                    | 引入 cascade 的早期场景与 ComputePass 里程碑              | 冻结阅读参考 |
+| `multi-layer-v2/`                    | CPU RealtimeSpectrum v2、packed assembly、IBL、dat.GUI v1 | 冻结阅读参考 |
+| `multi-layer-v3/`                    | GPU RealtimeSpectrum、泡沫、descriptor/hooks、dat.GUI v3  | 冻结阅读参考 |
+| `_shared/`                           | 被多个历史版本共同使用的 CPU 频谱与 Shader 备份           | 冻结共享参考 |
+| `_shared/ocean-params-migration-v1/` | OceanParams 退出正式主链时的迁移边界                      | 冻结阅读参考 |
 
 ## 现行版本
 
