@@ -123,7 +123,8 @@ prt/        PRT 球谐预计算(Nori 2,外部框架,C++)
 
 ## 开发约定 (Conventions)
 
-- 提交信息遵循 Conventional Commits,使用 `npm run commit`(commitizen)。
+- 提交信息遵循 Conventional Commits。想省事用 `npm run commit`(交互式选单);手写也行,CI 会校验。
+- PR 采用 Squash 合并,**PR 标题**即主干提交信息,故标题须符合规范。详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 - 文档命名、目录组织见 [docs/CONVENTIONS.md](docs/CONVENTIONS.md)。
 - 代码风格:ESLint + Prettier(含 `prettier-plugin-glsl`);提交前由 Husky + lint-staged 校验。
 
