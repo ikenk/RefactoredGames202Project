@@ -4,7 +4,7 @@ import { loadHW4Scene } from '@/scenes/games202/hw4/loadHW4Scene'
 import { loadHW3Scene } from '@/scenes/games202/hw3/cave/loadHW3Scene'
 import { SceneContext } from '@/scenes/types/SceneContext'
 import { SceneDisposer } from '@/scenes/types/SceneDisposer'
-import { GUI } from 'dat.gui'
+// import { GUI } from 'dat.gui'
 import { mountDatGUI } from '../_shared/mountGUI'
 
 /**

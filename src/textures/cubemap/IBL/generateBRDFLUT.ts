@@ -1,12 +1,12 @@
 import { getCapabilities } from '@/_config/glCapabilities'
-import { MipmappedCubemapFBO } from '@/framebuffers/MipmappedCubemapFBO'
-import { createCubeVBO } from '../shared/createCubeVBO'
+// import { MipmappedCubemapFBO } from '@/framebuffers/MipmappedCubemapFBO'
+// import { createCubeVBO } from '../shared/createCubeVBO'
 import { Shader } from '@/shaders/Shader'
 import { ShaderPaths } from '@/shaders/_config/shaderPaths'
-import { TextureCreationError } from '@/errors/EngineError/TextureError/TextureCreationError'
+// import { TextureCreationError } from '@/errors/EngineError/TextureError/TextureCreationError'
 import { FBO } from '@/framebuffers/FBO'
 import { FullScreenQuad } from '@/objects/FullScreenQuad'
-import { TextureLoadError } from '@/errors/EngineError/TextureError/TextureLoadError'
+// import { TextureLoadError } from '@/errors/EngineError/TextureError/TextureLoadError'
 import { captureGLState, restoreGLState, setCleanBakeState } from '@/utils/gl/withCleanGLState'
 
 export interface GenerateBRDFLUTOptions {

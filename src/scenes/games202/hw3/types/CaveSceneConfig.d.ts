@@ -1,5 +1,5 @@
 import { CubeMapImagesConfig } from '@/loaders/types/loadCubeMapImages'
-import { ModelConfig } from '@/renderers/factories/meshRendererFromModel/types/ModelConfig'
+// import { ModelConfig } from '@/renderers/factories/meshRendererFromModel/types/ModelConfig'
 import { SceneConfig } from '@/scenes/types/SceneConfig'
 
 /** Cave 场景的配置 */

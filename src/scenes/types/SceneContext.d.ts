@@ -1,8 +1,8 @@
 import { WebGLRenderer } from '@/renderers/WebGLRenderer'
 import { PerspectiveCamera } from 'three'
 import { OrbitControls } from 'three/examples/jsm/Addons.js'
-import { GUI } from 'dat.gui'
-import { Pane } from 'tweakpane'
+// import { GUI } from 'dat.gui'
+// import { Pane } from 'tweakpane'
 
 /**
  * 场景加载器需要的运行时上下文

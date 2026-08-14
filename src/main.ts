@@ -154,14 +154,14 @@ function showErrorDialog(config: {
                 ? `<a href="${action.href}" target="_blank">${action.label}</a>`
                 : `<button onclick="${action.onClick}">${action.label}</button>`
             )
-            .join('') || ''
+            .join('') ?? ''
         }
       </div>
     </div>
   `
 }
 
-function reportError(errorData: any) {
+function reportError(errorData: unknown) {
   // 发送到监控服务（Sentry、LogRocket等）
   console.log('Report error:', errorData)
 }

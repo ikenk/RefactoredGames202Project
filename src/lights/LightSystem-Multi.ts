@@ -88,7 +88,9 @@ export class LightSystem {
    * 在 WebGLRenderer.addRenderer 时自动调用，
    * 使得 scene config 中无需手动声明光照 uniform
    */
-  injectLightUniforms(renderer: BaseRenderer): void {}
+  injectLightUniforms(_renderer: BaseRenderer): void {
+    throw new Error('NOT IMPLEMENTED')
+  }
 
   // ============================================================
   //  初始化：推送光源参数

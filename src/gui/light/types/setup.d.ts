@@ -1,4 +1,4 @@
-import { ILight } from '@/lights/types/light'
+// import { ILight } from '@/lights/types/light'
 
 export interface LightGUIConfig {
   name: string

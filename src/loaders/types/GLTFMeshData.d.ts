@@ -1,5 +1,4 @@
 import { Vec3 } from '@/math/types/math'
-import { Transform } from '@/objects/utils/Transform'
 import { SharedTextureData, SharedVertexData } from './SharedMeshData'
 import { TextureImageSource } from '@/textures/types/texture'
 
