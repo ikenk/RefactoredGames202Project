@@ -1,4 +1,5 @@
 import { EngineError } from '../BaseError'
+import type { ErrorContext } from '@/errors/EngineError/types/ErrorContext'
 
 /**
  * 配置错误基类
@@ -32,7 +33,7 @@ export class ConfigurationError extends EngineError {
     code: string,
     options: {
       configPath?: string
-      context?: Record<string, any>
+      context?: ErrorContext
       cause?: Error
     } = {}
   ) {

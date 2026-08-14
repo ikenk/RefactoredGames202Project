@@ -1,11 +1,12 @@
 import { EngineError } from './BaseError'
+import type { ErrorContext } from '@/errors/EngineError/types/ErrorContext'
 
 export class EngineRunningError extends EngineError {
   constructor(
     message: string,
     code: string,
     options: {
-      context?: Record<string, any>
+      context?: ErrorContext
       recoverable?: boolean
       cause?: Error
     } = {}

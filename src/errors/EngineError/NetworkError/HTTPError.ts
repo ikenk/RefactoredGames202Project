@@ -24,6 +24,6 @@ export class HttpError extends NetworkError {
       503: '服务不可用'
     }
 
-    return messages[this.httpStatus!] || `网络错误 (${this.httpStatus})`
+    return messages[this.httpStatus!] ?? `网络错误 (${this.httpStatus})`
   }
 }

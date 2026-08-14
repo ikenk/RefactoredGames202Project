@@ -18,7 +18,7 @@ export class TypeAssertionError extends Error {
     this.name = 'TypeAssertionError'
 
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor as new (...arg: any[]) => unknown)
+      Error.captureStackTrace(this, new.target)
     }
   }
 }

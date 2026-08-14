@@ -1,4 +1,5 @@
 import { EngineError } from '../BaseError'
+import type { ErrorContext } from '@/errors/EngineError/types/ErrorContext'
 
 export class FramebufferError extends EngineError {
   public readonly width: number
@@ -10,7 +11,7 @@ export class FramebufferError extends EngineError {
     options: {
       width: number
       height: number
-      context?: Record<string, any>
+      context?: ErrorContext
       recoverable?: boolean
       cause?: Error
     }

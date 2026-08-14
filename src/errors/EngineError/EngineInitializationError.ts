@@ -26,7 +26,7 @@ export class EngineInitializationError extends EngineError {
       resources: '资源加载'
     }
 
-    const stageName = stageNames[this.stage] || this.stage
+    const stageName = stageNames[this.stage] ?? this.stage
     return `引擎初始化失败（${stageName}）`
   }
 }

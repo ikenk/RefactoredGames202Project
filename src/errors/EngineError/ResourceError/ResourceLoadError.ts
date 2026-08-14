@@ -1,5 +1,5 @@
 import { ResourceError } from './BaseError'
-import { ResourceType } from './types/ResourceError'
+import type { ErrorContext } from '@/errors/EngineError/types/ErrorContext'
 
 /**
  * 资源加载错误（仅用于外部用户资源）
@@ -16,12 +16,7 @@ import { ResourceType } from './types/ResourceError'
  * - 配置文件（使用 ConfigLoadError）
  */
 export class ResourceLoadError extends ResourceError {
-  constructor(
-    resourceType: string,
-    resourcePath: string,
-    context?: Record<string, any>,
-    cause?: Error
-  ) {
+  constructor(resourceType: string, resourcePath: string, context?: ErrorContext, cause?: Error) {
     super(
       resourceType,
       resourcePath,
@@ -49,7 +44,7 @@ export class ResourceLoadError extends ResourceError {
       font: '字体'
     }
 
-    const typeName = typeNames[this.resourceType] || this.resourceType
+    const typeName = typeNames[this.resourceType] ?? this.resourceType
     return `加载${typeName}失败：${this.resourcePath}`
   }
 }

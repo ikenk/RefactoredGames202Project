@@ -8,7 +8,7 @@ export class WebGLExtensionError extends WebGLError {
 
   constructor(extensionName: string, message?: string) {
     super(
-      message || `WebGL extension "${extensionName}" is not supported`,
+      message ?? `WebGL extension "${extensionName}" is not supported`,
       'WEBGL_EXTENSION_NOT_SUPPORTED',
       {
         context: { extensionName },
@@ -26,7 +26,7 @@ export class WebGLExtensionError extends WebGLError {
       WEBGL_draw_buffers: '多重渲染目标'
     }
 
-    const friendly = friendlyNames[this.extensionName] || this.extensionName
+    const friendly = friendlyNames[this.extensionName] ?? this.extensionName
 
     return `您的显卡不支持 ${friendly} 功能，无法运行此程序。`
   }

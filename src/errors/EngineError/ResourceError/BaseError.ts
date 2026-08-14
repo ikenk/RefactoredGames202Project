@@ -1,5 +1,5 @@
 import { EngineError } from '../BaseError'
-import { ResourceType } from './types/ResourceError'
+import type { ErrorContext } from '@/errors/EngineError/types/ErrorContext'
 
 /**
  * 资源错误基类
@@ -44,7 +44,7 @@ export class ResourceError extends EngineError {
     message: string,
     code: string,
     options: {
-      context?: Record<string, any>
+      context?: ErrorContext
       recoverable?: boolean
       cause?: Error
     } = {}

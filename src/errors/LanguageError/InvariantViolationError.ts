@@ -21,7 +21,7 @@ export class InvariantViolationError extends Error {
     this.name = 'InvariantViolationError'
 
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor as new (...args: any[]) => unknown)
+      Error.captureStackTrace(this, new.target)
     }
   }
 }

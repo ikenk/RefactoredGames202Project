@@ -1,5 +1,6 @@
 import type { ShaderErrorKind } from '@/shaders/types/Shader'
 import { EngineError } from '../BaseError'
+import type { ErrorContext } from '@/errors/EngineError/types/ErrorContext'
 
 /**
  * Shader 错误基类
@@ -14,7 +15,7 @@ export class ShaderError extends EngineError {
     options: {
       shaderPath: string
       shaderType: ShaderErrorKind
-      context?: Record<string, any>
+      context?: ErrorContext
       recoverable?: boolean
       cause?: Error
     }

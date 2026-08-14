@@ -4,7 +4,7 @@ export class ExhaustiveMatchError extends Error {
     this.name = 'ExhaustiveMatchError'
 
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor as new (...args: any[]) => unknown)
+      Error.captureStackTrace(this, new.target)
     }
   }
 }

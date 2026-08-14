@@ -1,4 +1,5 @@
 import { EngineError } from '../BaseError'
+import type { ErrorContext } from '@/errors/EngineError/types/ErrorContext'
 
 /**
  * WebGL 错误基类
@@ -10,7 +11,7 @@ export class WebGLError extends EngineError {
     message: string,
     code: string,
     options: {
-      context?: Record<string, any>
+      context?: ErrorContext
       recoverable?: boolean
       cause?: Error
     } = {}

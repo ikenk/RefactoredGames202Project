@@ -1,4 +1,5 @@
 import { EngineError } from '../BaseError'
+import type { ErrorContext } from '@/errors/EngineError/types/ErrorContext'
 
 /**
  * 纹理错误基类
@@ -35,7 +36,7 @@ export class TextureError extends EngineError {
     code: string,
     options: {
       textureType?: string
-      context?: Record<string, any>
+      context?: ErrorContext
       recoverable?: boolean
       cause?: Error
     } = {}

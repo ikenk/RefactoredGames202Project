@@ -1,4 +1,5 @@
 import { FramebufferError } from './BaseError'
+import type { ErrorContext } from '@/errors/EngineError/types/ErrorContext'
 
 export class FramebufferCreationError extends FramebufferError {
   constructor(
@@ -6,7 +7,7 @@ export class FramebufferCreationError extends FramebufferError {
     height: number,
     options?: {
       reason?: string
-      context?: Record<string, any> | undefined
+      context?: ErrorContext
       cause?: Error
     }
   ) {

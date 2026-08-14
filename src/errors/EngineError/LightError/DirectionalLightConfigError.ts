@@ -1,4 +1,5 @@
 import { LightError } from './BaseError'
+import type { ErrorContext } from '@/errors/EngineError/types/ErrorContext'
 
 /**
  * 方向光配置非法
@@ -11,7 +12,7 @@ import { LightError } from './BaseError'
  * 不可恢复：调用方必须修配置后重新构造，不能在运行时自愈
  */
 export class DirectionalLightConfigError extends LightError {
-  constructor(reason: string, context?: Record<string, any>) {
+  constructor(reason: string, context?: ErrorContext) {
     super(`[DirectionalLight] ${reason}`, 'DIRECTIONAL_LIGHT_CONFIG', {
       context,
       recoverable: false

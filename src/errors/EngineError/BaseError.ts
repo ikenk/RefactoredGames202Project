@@ -1,3 +1,5 @@
+import type { ErrorContext } from '@/errors/EngineError/types/ErrorContext'
+
 /**
  * 所有自定义错误的基类
  *
@@ -42,7 +44,7 @@ export abstract class EngineError extends Error {
   public readonly timestamp: Date
 
   // 错误上下文（附加信息）
-  public readonly context?: Record<string, unknown>
+  public readonly context?: ErrorContext
 
   // 是否可恢复
   public readonly recoverable: boolean
@@ -54,7 +56,7 @@ export abstract class EngineError extends Error {
     message: string,
     code: string,
     options: {
-      context?: Record<string, unknown>
+      context?: ErrorContext
       recoverable?: boolean
       cause?: Error
     } = {}
@@ -77,7 +79,7 @@ export abstract class EngineError extends Error {
 
     // 捕获堆栈跟踪
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor as new (...args: any[]) => unknown)
+      Error.captureStackTrace(this, new.target)
     }
   }
 

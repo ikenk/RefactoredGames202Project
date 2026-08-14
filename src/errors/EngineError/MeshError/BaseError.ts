@@ -1,4 +1,5 @@
 import { EngineError } from '../BaseError'
+import type { ErrorContext } from '@/errors/EngineError/types/ErrorContext'
 
 export class MeshError extends EngineError {
   public readonly meshName: string
@@ -8,7 +9,7 @@ export class MeshError extends EngineError {
     code: string,
     meshName: string,
     options: {
-      context?: Record<string, any>
+      context?: ErrorContext
       cause?: Error
       recoverable?: boolean
     }

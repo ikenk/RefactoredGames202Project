@@ -1,4 +1,5 @@
 import { FramebufferError } from './BaseError'
+import type { ErrorContext } from '@/errors/EngineError/types/ErrorContext'
 
 /**
  * FBO releaseTexture / releaseAllTextures 阶段的错误。
@@ -16,7 +17,7 @@ export class FramebufferReleaseError extends FramebufferError {
     height: number,
     options: {
       reason: string
-      context?: Record<string, any>
+      context?: ErrorContext
       cause?: Error
     }
   ) {
