@@ -41,14 +41,42 @@ export function applyFFTOceanSnapshot(snapshot: FFTOceanSnapshot, config: FFTOce
   })
 }
 
-function copyMaterialConfig(config: FFTOceanMaterialConfig): FFTOceanMaterialConfig {
-  const copy: Record<string, unknown> = {}
+function copyVec2(value: [number, number]): [number, number] {
+  return [value[0], value[1]]
+}
 
-  for (const [key, value] of Object.entries(config)) {
-    copy[key] = Array.isArray(value) ? [...value] : value
+function copyVec3(value: [number, number, number]): [number, number, number] {
+  return [value[0], value[1], value[2]]
+}
+
+function copyMaterialConfig(config: FFTOceanMaterialConfig): FFTOceanMaterialConfig {
+  const copy: FFTOceanMaterialConfig = { ...config }
+
+  if (config.ambientColor !== undefined) {
+    copy.ambientColor = copyVec3(config.ambientColor)
   }
 
-  return copy as FFTOceanMaterialConfig
+  if (config.depthCenter !== undefined) {
+    copy.depthCenter = copyVec2(config.depthCenter)
+  }
+
+  if (config.scatterColor !== undefined) {
+    copy.scatterColor = copyVec3(config.scatterColor)
+  }
+
+  if (config.scatterPeakColor !== undefined) {
+    copy.scatterPeakColor = copyVec3(config.scatterPeakColor)
+  }
+
+  if (config.foamColor !== undefined) {
+    copy.foamColor = copyVec3(config.foamColor)
+  }
+
+  if (config.fogColor !== undefined) {
+    copy.fogColor = copyVec3(config.fogColor)
+  }
+
+  return copy
 }
 
 function copyLayerAuthoringConfig(

@@ -38,6 +38,31 @@ describe('FFT Ocean GUI persistence snapshot', () => {
     expect(savedLayer.blend.layerContribute).toBe(0.6)
   })
 
+  it('拍摄材质配置快照时复制所有元组字段', () => {
+    const config = createConfig()
+    config.materialConfig.ambientColor = [0.1, 0.2, 0.3]
+    config.materialConfig.depthCenter = [10, 20]
+    config.materialConfig.scatterColor = [0.3, 0.4, 0.5]
+    config.materialConfig.scatterPeakColor = [0.6, 0.7, 0.8]
+    config.materialConfig.foamColor = [0.9, 0.8, 0.7]
+    config.materialConfig.fogColor = [0.2, 0.3, 0.4]
+
+    const snapshot = takeFFTOceanSnapshot(config)
+    const tupleFields = [
+      'ambientColor',
+      'depthCenter',
+      'scatterColor',
+      'scatterPeakColor',
+      'foamColor',
+      'fogColor'
+    ] as const
+
+    for (const field of tupleFields) {
+      expect(snapshot.materialConfig[field]).toStrictEqual(config.materialConfig[field])
+      expect(snapshot.materialConfig[field]).not.toBe(config.materialConfig[field])
+    }
+  })
+
   it('应用快照时保留 Tweakpane 已绑定对象的身份并写入显式 0', () => {
     const config = createConfig()
     const layer = config.layers[0]!
