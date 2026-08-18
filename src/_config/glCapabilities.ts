@@ -1,4 +1,5 @@
 import { WebGLExtensionError } from '@/errors/EngineError/WebGLError/WebGLExtensionError'
+import { logger } from '@/logging/Logger'
 import { GLCapabilities } from './types/glCapabilities'
 
 /** 全局 WebGL 能力标记，由 Engine.initGL 初始化 */
@@ -100,7 +101,7 @@ export function initCapabilities(gl: WebGLRenderingContext): GLCapabilities {
     vertexArrayObject: gl.getExtension('OES_vertex_array_object')
   }
 
-  console.log(`${ctx} `, _capabilities)
+  logger.debug(`${ctx} `, _capabilities)
   return _capabilities
 }
 

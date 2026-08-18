@@ -1,3 +1,4 @@
+import { logger } from '@/logging/Logger'
 import { loadHW1Scene } from '@/scenes/games202/hw1/loadHW1Scene'
 import { loadHW2Scene } from '@/scenes/games202/hw2/loadHW2Scene'
 import { loadHW4Scene } from '@/scenes/games202/hw4/loadHW4Scene'
@@ -62,7 +63,7 @@ export async function setupGames202HWSceneGUI(ctx: SceneContext) {
     // 1. 清理旧场景
     if (activeSceneDisposer) {
       activeSceneDisposer()
-      console.log('activeSceneDisposer: ', activeSceneDisposer)
+      logger.debug('activeSceneDisposer: ', activeSceneDisposer)
       activeSceneDisposer = null
     }
     // 2. 清空 renderer 的所有 pass（除了 WebGLRenderer 中的 overlayRenderPass)

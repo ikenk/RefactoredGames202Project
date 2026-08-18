@@ -1,3 +1,4 @@
+import { logger } from '@/logging/Logger'
 import { Shader } from '@/shaders/Shader'
 import { mat4, quat } from 'gl-matrix'
 import { WebGLExtensionError } from '@/errors/EngineError/WebGLError/WebGLExtensionError'
@@ -354,7 +355,7 @@ export class Mesh {
     } else if (skipped.length > 0) {
       // 部分未命中是正常的，从 console.warn 降级为 console.debug 并合并成一条，
       // 避免 HW4 那种「20 条 aTangent 警告刷屏」
-      console.debug(
+      logger.debug(
         `[Mesh '${this.name}'] attributes not used by '${shader.name}': ${skipped.join(', ')}`
       )
     }

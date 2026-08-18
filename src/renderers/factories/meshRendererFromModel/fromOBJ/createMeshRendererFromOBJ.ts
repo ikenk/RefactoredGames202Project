@@ -1,3 +1,4 @@
+import { logger } from '@/logging/Logger'
 import { OBJMeshData } from '@/loaders/types/OBJMeshData'
 import { MeshRendererFromOBJConfig } from '../types/MeshRendererFromOBJConfig'
 import { Mesh } from '@/objects/Mesh'
@@ -48,7 +49,7 @@ export async function createMeshRendererFromOBJ(
     if (extraUniforms) {
       Object.assign(uniforms, extraUniforms)
     }
-    console.debug('[function createMeshRendererFromOBJ]', uniforms)
+    logger.debug('[function createMeshRendererFromOBJ]', uniforms)
     material = new Material(`${data.name}_Material<${rendererName}>`, uniforms)
   }
 

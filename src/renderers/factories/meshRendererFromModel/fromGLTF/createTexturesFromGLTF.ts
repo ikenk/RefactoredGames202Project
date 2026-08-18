@@ -1,3 +1,4 @@
+import { logger } from '@/logging/Logger'
 import { GLTFMeshData } from '@/loaders/types/GLTFMeshData'
 import { Texture } from '@/textures/Texture'
 import { GLTF_TEXTURE_UNIFORM_MAP } from '../constants/gltfTextureUniformMap'
@@ -28,7 +29,7 @@ export function createTexturesFromGLTF(
     if (isTextureImageSource(image)) {
       tex.createFromImage(image)
     } else {
-      console.debug(`[GLTF Texture] ${field} → fallback 纯色`)
+      logger.debug(`[GLTF Texture] ${field} → fallback 纯色`)
       if (TEXTURE_FALLBACK_MAP[field]) {
         const { colorField, fallback } = TEXTURE_FALLBACK_MAP[field]
         const color: Vec3 = colorField

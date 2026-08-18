@@ -1,3 +1,4 @@
+import { logger } from '@/logging/Logger'
 import { HttpError } from '@/errors/EngineError/NetworkError/HTTPError'
 import { NetworkTimeoutError } from '@/errors/EngineError/NetworkError/NetworkTimeoutError'
 import { ShaderLoadError } from '@/errors/EngineError/ShaderError/ShaderLoadError'
@@ -179,7 +180,7 @@ export class Shader {
 
     const cached = Shader.cache.get(shaderName)
     if (cached) {
-      console.debug('cached')
+      logger.debug('cached')
       return cached
     }
 

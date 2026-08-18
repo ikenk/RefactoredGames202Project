@@ -1,3 +1,4 @@
+import { logger } from '@/logging/Logger'
 import { SceneContext } from '../../types/SceneContext'
 import { HW1_SCENE_CONFIG } from './_config/hw1SceneConfig'
 import { loadOBJ } from '@/loaders/loadOBJ'
@@ -42,7 +43,7 @@ export async function loadHW1Scene(ctx: SceneContext): Promise<() => void> {
     // 1. 加载纯数据
     const meshDataArr = await loadOBJ(modelConfig.path, modelConfig.name, modelConfig.transform)
 
-    console.log(`[function loadHW1Scene] meshDataArr.length: ${meshDataArr.length}`)
+    logger.info(`[function loadHW1Scene] meshDataArr.length: ${meshDataArr.length}`)
 
     // 2. 数据 → MeshRenderer → 注册到 renderer
     for (let i = 0; i < meshDataArr.length; i++) {
@@ -63,7 +64,7 @@ export async function loadHW1Scene(ctx: SceneContext): Promise<() => void> {
   if (lightConfigs) {
     for (const lightConfig of lightConfigs) {
       if (lightConfig.guiConfig) {
-        console.debug('[function loadHW1Scene] setupLightGUI has run.')
+        logger.debug('[function loadHW1Scene] setupLightGUI has run.')
         const folder = setupLightGUI(gui, lightConfig.light, lightConfig.guiConfig, (worldSize) => {
           // worldSize 变了 → 同步到对应的 visualizer
           const visualizer = lightSystem.getVisualizer(lightConfig.id)

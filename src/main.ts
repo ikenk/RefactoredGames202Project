@@ -2,6 +2,7 @@ import '@/styles/main.css'
 import '@/styles/gui-stack.css'
 import '@/styles/tweakpane-theme.css'
 import '@/styles/datgui-theme.css'
+import { logger } from '@/logging/Logger'
 import { Engine } from './engine'
 import { WebGLNotSupportedError } from './errors/EngineError/WebGLError/WebGLNotSupportedError'
 import { WebGLExtensionError } from './errors/EngineError/WebGLError/WebGLExtensionError'
@@ -16,7 +17,7 @@ import { EngineInitializationError } from './errors/EngineError/EngineInitializa
 
 // import { loadFFTOceanScene as loadFFTOceanSceneV3 } from './scenes/water/fftOcean/loadFFTOceanScene-multi-layers-v3'
 import { loadFFTOceanScene as loadFFTOceanSceneV4 } from './scenes/water/fftOcean/loadFFTOceanScene-multi-layers-v4'
-import { loadScene as loadCloudsOverSeaAndPeaksScene } from './scenes/shadertoy/lerrian/cloudsOverSeaAndPeaks/loadScene'
+// import { loadScene as loadCloudsOverSeaAndPeaksScene } from './scenes/shadertoy/lerrian/cloudsOverSeaAndPeaks/loadScene'
 import { loadGames202Scenes } from './scenes/games202/loadGames202Scene'
 
 let titleEle = document.querySelector('head title')
@@ -163,7 +164,7 @@ function showErrorDialog(config: {
 
 function reportError(errorData: unknown) {
   // 发送到监控服务（Sentry、LogRocket等）
-  console.log('Report error:', errorData)
+  logger.error('Report error:', errorData)
 }
 
 function loadDefaultConfig() {}

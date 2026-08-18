@@ -8,6 +8,7 @@
 
 import type { Pane, FolderApi } from 'tweakpane'
 import type { FFTOceanConfig } from '@/scenes/water/fftOcean/types/FFTOceanConfig-MultiLayers'
+import { logger } from '@/logging/Logger'
 import type { PersistenceHook } from './usePersistence'
 
 type Container = Pane | FolderApi
@@ -25,19 +26,19 @@ export function usePresets(
 
       folder.addButton({ title: '💾 Save now' }).on('click', () => {
         persistence.markDirty()
-        console.info('[usePresets v4] saved current settings')
+        logger.info('[usePresets v4] saved current settings')
       })
 
       folder.addButton({ title: '🗑 Clear saved' }).on('click', () => {
         persistence.clear()
-        console.info('[usePresets v4] cleared localStorage (refresh to take effect)')
+        logger.info('[usePresets v4] cleared localStorage (refresh to take effect)')
       })
 
       folder.addButton({ title: '♻️ Reset to factory' }).on('click', () => {
         persistence.apply(FACTORY)
         persistence.clear()
         onApply()
-        console.info('[usePresets v4] reset to factory defaults')
+        logger.info('[usePresets v4] reset to factory defaults')
       })
     }
   }

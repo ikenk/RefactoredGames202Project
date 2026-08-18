@@ -1,3 +1,4 @@
+import { logger } from '@/logging/Logger'
 import { Texture } from './Texture'
 
 export class LRUTextureCache {
@@ -33,7 +34,7 @@ export class LRUTextureCache {
       const oldestTexture = this.cache.get(oldestKey!)!
       oldestTexture.dispose() // 释放 GPU 资源
       this.cache.delete(oldestKey!)
-      console.log(`[LRU] 淘汰纹理: ${oldestKey}`)
+      logger.debug(`[LRU] 淘汰纹理: ${oldestKey}`)
     }
 
     this.cache.set(key, texture)

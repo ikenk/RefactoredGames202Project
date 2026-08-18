@@ -1,3 +1,4 @@
+import { logger } from '@/logging/Logger'
 import { loadGLTF } from '@/loaders/loadGLTF'
 import { CAVE_SCENE_CONFIG_GBUFFER } from './_config/caveSceneConfig'
 import { setupLightGUI } from '@/gui/light/setup'
@@ -48,7 +49,7 @@ export async function loadHW3Scene(ctx: SceneContext) {
       if (lightConfig.guiConfig) {
         const folder = setupLightGUI(gui, lightConfig.light, lightConfig.guiConfig)
         folders.push(folder)
-        console.debug('[function loadHW3Scene] setupLightGUI has run.')
+        logger.debug('[function loadHW3Scene] setupLightGUI has run.')
       }
     }
   } else {
@@ -65,7 +66,7 @@ export async function loadHW3Scene(ctx: SceneContext) {
     // 1. 加载纯数据
     const meshDataArr = await loadGLTF(modelConfig.path, modelConfig.name, modelConfig.transform)
 
-    console.log(`[function loadHW3Scene] meshDataArr.length: ${meshDataArr.length}`)
+    logger.info(`[function loadHW3Scene] meshDataArr.length: ${meshDataArr.length}`)
 
     // 2. 数据 → MeshRenderer → 注册到 renderer
     for (let i = 0; i < meshDataArr.length; i++) {

@@ -259,6 +259,17 @@ export default [
   },
 
   {
+    name: 'project/logger-console-sink',
+
+    files: ['src/logging/Logger.ts'],
+
+    rules: {
+      /** Logger 的浏览器日志出口需要直接调用 console。 */
+      'no-console': 'off'
+    }
+  },
+
+  {
     name: 'project/production-console-relaxed-modules',
 
     files: [

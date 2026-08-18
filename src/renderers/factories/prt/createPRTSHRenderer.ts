@@ -1,3 +1,4 @@
+import { logger } from '@/logging/Logger'
 import { loadOBJ } from '@/loaders/loadOBJ'
 import { loadPRTSHTxt } from '@/loaders/loadPRTSHTxt'
 import { createSHMesh } from '@/objects/prt/sphericalHarmonics/createSHMesh'
@@ -45,8 +46,8 @@ export async function createPRTSHRenderer(
   const prtData = await loadPRTSHTxt(prtDataDir, modelName, transportType)
 
   // console.debug(prtData.lightSH)
-  console.debug(prtData.transportSH.length)
-  console.debug(meshTransform)
+  logger.debug(prtData.transportSH.length)
+  logger.debug(meshTransform)
 
   // 4. 创建 Mesh (transport SH 顶点属性)
   const mesh = createSHMesh(

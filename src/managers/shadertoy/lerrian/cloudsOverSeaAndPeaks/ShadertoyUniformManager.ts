@@ -1,3 +1,4 @@
+import { logger } from '@/logging/Logger'
 import { RenderManager } from '@/managers/types/RenderManager'
 import { UniformType } from '@/materials/types/Material'
 import { BaseRenderer } from '@/renderers/BaseRenderer'
@@ -78,7 +79,7 @@ export class ShadertoyUniformManager implements RenderManager {
       this.accumulatedX = this.dragBaseX + this.mouseX - this.dragStartX
       this.accumulatedY = this.dragBaseY + this.mouseY - this.dragStartY
 
-      console.log(this.accumulatedX, this.accumulatedY)
+      logger.debug(this.accumulatedX, this.accumulatedY)
     }
 
     // 鼠标抬起监听函数

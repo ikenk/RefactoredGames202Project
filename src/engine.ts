@@ -1,6 +1,7 @@
 import { PerspectiveCamera } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
+import { logger } from '@/logging/Logger'
 import { WebGLRenderer } from '@/renderers/WebGLRenderer'
 import { CameraConfig } from './scenes/types/SceneConfig'
 import { PerformanceMonitor } from '@/monitors/PerformanceMonitor'
@@ -158,7 +159,7 @@ export class Engine {
     this.renderer = renderer
     this.perfMonitor = perfMonitor
 
-    console.log('✅ Class Engine has initialized')
+    logger.info('✅ Class Engine has initialized')
   }
 
   /**
@@ -212,7 +213,7 @@ export class Engine {
 
     // 查询最大纹理单元
     const maxTexImgUnits = caps.maxFragmentTextureUnits
-    console.log('MAX_TEXTURE_IMAGE_UNITS:', maxTexImgUnits)
+    logger.debug('MAX_TEXTURE_IMAGE_UNITS:', maxTexImgUnits)
 
     // 监听上下文丢失
     canvas.addEventListener('webglcontextlost', (event) => {
@@ -414,7 +415,7 @@ export class Engine {
     camera: PerspectiveCamera
   ) {
     window.addEventListener('resize', () => {
-      console.log(`window resize, canvas size: ${canvas.width} * ${canvas.height}`)
+      logger.debug(`window resize, canvas size: ${canvas.width} * ${canvas.height}`)
       Engine.setupCanvas(canvas) // 更新 canvas.width/height
       Engine.setupGLViewport(canvas, gl) // 更新 gl.viewport
       Engine.updateCameraAspect(canvas, camera) // 只更新 aspect

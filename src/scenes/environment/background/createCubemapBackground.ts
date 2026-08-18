@@ -1,3 +1,4 @@
+import { logger } from '@/logging/Logger'
 import { MeshRenderer } from '@/renderers/MeshRenderer'
 import { CubemapBackgroundConfig } from './types/CubemapBackgroundConfig'
 import { CubeMapTexture } from '@/textures/CubeMapTexture'
@@ -34,7 +35,7 @@ export async function createCubemapBackground(
   const defaultFaceKeys = ['px', 'nx', 'py', 'ny', 'pz', 'nz']
   const faceKeys = config.faceKeys ?? defaultFaceKeys
 
-  console.debug(config)
+  logger.debug(config)
 
   const tex = new CubeMapTexture(gl)
 

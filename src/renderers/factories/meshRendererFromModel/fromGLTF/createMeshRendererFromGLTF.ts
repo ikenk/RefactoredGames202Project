@@ -1,3 +1,4 @@
+import { logger } from '@/logging/Logger'
 import { MeshRendererFromGLTFConfig } from '../types/MeshRendererFromGLTFConfig'
 import { Uniforms, UniformType } from '@/materials/types/Material'
 import { Material } from '@/materials/Material'
@@ -78,7 +79,7 @@ export async function createMeshRendererFromGLTF(
     if (extraUniforms) {
       Object.assign(uniforms, extraUniforms)
     }
-    console.log('[function createMeshRendererFromGLTF]', uniforms)
+    logger.debug('[function createMeshRendererFromGLTF]', uniforms)
     material = new Material(`${data.name}_Material<${rendererName}>`, uniforms)
   }
 

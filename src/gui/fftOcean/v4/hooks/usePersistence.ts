@@ -8,6 +8,7 @@
  */
 
 import type { FFTOceanConfig } from '@/scenes/water/fftOcean/types/FFTOceanConfig-MultiLayers'
+import { logger } from '@/logging/Logger'
 import {
   applyFFTOceanSnapshot,
   takeFFTOceanSnapshot,
@@ -38,7 +39,7 @@ export function usePersistence(config: FFTOceanConfig, storageKey: string, debou
 
         applyFFTOceanSnapshot(parsed as FFTOceanSnapshot, config)
 
-        console.info(`[usePersistence] restored from "${storageKey}"`)
+        logger.info(`[usePersistence] restored from "${storageKey}"`)
 
         return true
       } catch (error) {
