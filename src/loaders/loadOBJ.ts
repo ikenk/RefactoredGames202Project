@@ -4,6 +4,7 @@ import { Mesh as THREEMesh, MeshPhongMaterial } from 'three'
 import { LoadingManager } from 'three'
 import { MTLLoader, OBJLoader } from 'three/examples/jsm/Addons.js'
 import { OBJMeshData } from './types/OBJMeshData'
+import { getTextureImageSource } from './utils/getTextureImageSource'
 
 /** 只负责加载和解析 OBJ + MTL，返回纯数据 */
 export async function loadOBJ(
@@ -88,16 +89,16 @@ export async function loadOBJ(
                     ? new Float32Array(computedTangentAttr.array)
                     : null,
                   colors: colorAttr ? new Float32Array(colorAttr.array) : null,
-                  diffuseImage: mat.map?.image ?? null,
+                  diffuseImage: getTextureImageSource(mat.map),
                   diffuseColor: mat.color.toArray() as Vec3,
-                  specularImage: mat.specularMap?.image ?? null,
+                  specularImage: getTextureImageSource(mat.specularMap),
                   specularColor: mat.specular.toArray() as Vec3,
                   shininess: mat.shininess ?? 30,
-                  normalImage: mat.normalMap?.image ?? null,
-                  aoImage: mat.aoMap?.image ?? null,
-                  emissiveImage: mat.emissiveMap?.image ?? null,
-                  displacementImage: mat.displacementMap?.image ?? null,
-                  alphaImage: mat.alphaMap?.image ?? null
+                  normalImage: getTextureImageSource(mat.normalMap),
+                  aoImage: getTextureImageSource(mat.aoMap),
+                  emissiveImage: getTextureImageSource(mat.emissiveMap),
+                  displacementImage: getTextureImageSource(mat.displacementMap),
+                  alphaImage: getTextureImageSource(mat.alphaMap)
                 })
               })
 

@@ -3,6 +3,7 @@ import { Transform } from '@/objects/utils/Transform'
 import { Mesh as THREEMesh, MeshStandardMaterial } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/Addons.js'
 import { GLTFMeshData } from './types/GLTFMeshData'
+import { getTextureImageSource } from './utils/getTextureImageSource'
 
 /** 只负责加载和解析，返回纯数据 */
 export async function loadGLTF(
@@ -69,14 +70,14 @@ export async function loadGLTF(
                 [child.scale.x, child.scale.y, child.scale.z]
               ),
             // PBR 材质数据 -- PBR 贴图
-            diffuseImage: mat.map?.image ?? null,
-            normalImage: mat.normalMap?.image ?? null,
-            metalnessImage: mat.metalnessMap?.image ?? null,
-            aoImage: mat.aoMap?.image ?? null,
-            emissiveImage: mat.emissiveMap?.image ?? null,
-            roughnessImage: mat.roughnessMap?.image ?? null,
-            displacementImage: mat.displacementMap?.image ?? null,
-            alphaImage: mat.alphaMap?.image ?? null,
+            diffuseImage: getTextureImageSource(mat.map),
+            normalImage: getTextureImageSource(mat.normalMap),
+            metalnessImage: getTextureImageSource(mat.metalnessMap),
+            aoImage: getTextureImageSource(mat.aoMap),
+            emissiveImage: getTextureImageSource(mat.emissiveMap),
+            roughnessImage: getTextureImageSource(mat.roughnessMap),
+            displacementImage: getTextureImageSource(mat.displacementMap),
+            alphaImage: getTextureImageSource(mat.alphaMap),
             // PBR 材质数据 -- PBR 标量参数
             diffuseColor: mat.color.toArray() as Vec3,
             metalness: mat.metalness ?? 0,
