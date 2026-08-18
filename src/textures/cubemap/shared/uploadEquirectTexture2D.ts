@@ -2,20 +2,50 @@ import { getCapabilities } from '@/_config/glCapabilities'
 import { InvalidTextureFormatError } from '@/errors/EngineError/TextureError/InvalidTextureFormatError'
 import { TextureCreationError } from '@/errors/EngineError/TextureError/TextureCreationError'
 import { WebGLExtensionError } from '@/errors/EngineError/WebGLError/WebGLExtensionError'
-import { DataTexture, TypedArray } from 'three'
+import { DataTexture } from 'three'
+
+interface FloatDataTextureSource {
+  data: Float32Array
+  width: number
+  height: number
+}
+
+function isFloatDataTextureSource(value: unknown): value is FloatDataTextureSource {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+
+  return (
+    'data' in value &&
+    value.data instanceof Float32Array &&
+    'width' in value &&
+    typeof value.width === 'number' &&
+    Number.isInteger(value.width) &&
+    value.width > 0 &&
+    'height' in value &&
+    typeof value.height === 'number' &&
+    Number.isInteger(value.height) &&
+    value.height > 0
+  )
+}
 
 export function uploadEquirectTexture2D(
   gl: WebGLRenderingContext,
   dataTexture: DataTexture
 ): WebGLTexture {
   // 1. 验证输入 & 扩展
-  const { data, width, height }: { data: TypedArray; width: number; height: number } =
-    dataTexture.source.data
-  if (!(data instanceof Float32Array)) {
-    throw new InvalidTextureFormatError('HDR 环境贴图必须使用 Float32Array 格式', {
-      actualType: data.constructor.name
-    })
+  const sourceData: unknown = dataTexture.source.data
+
+  if (!isFloatDataTextureSource(sourceData)) {
+    throw new InvalidTextureFormatError(
+      'HDR 环境贴图必须包含 Float32Array data 和有效的 width/height',
+      {
+        actualType: Object.prototype.toString.call(sourceData)
+      }
+    )
   }
+
+  const { data, width, height } = sourceData
   if (!getCapabilities().floatTexture) {
     throw new WebGLExtensionError('OES_texture_float')
   }
