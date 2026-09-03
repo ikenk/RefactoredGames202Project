@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { Logger, type LogSink } from '@/logging/Logger'
+import { Logger } from '@/logging/Logger'
+import type { LogSink } from '@/logging/types/Logger'
 
 function createSink(): LogSink {
   return {
