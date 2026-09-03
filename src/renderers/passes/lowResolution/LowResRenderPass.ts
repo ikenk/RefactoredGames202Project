@@ -6,6 +6,7 @@ import { DownscaleFBO } from '@/framebuffers/DownscaleFBO'
 import { Shader } from '@/shaders/Shader'
 import { FullScreenQuad } from '@/objects/FullScreenQuad'
 import { ShaderPaths } from '@/shaders/_config/shaderPaths'
+import type { RenderTargetScope } from '@/renderers/types/RenderTargetScope'
 
 export class LowResRenderPass implements RenderPass {
   public readonly name = 'LowResRenderPass'
@@ -49,36 +50,68 @@ export class LowResRenderPass implements RenderPass {
     this.scale = scale
   }
 
-  execute(context: FrameContext, camera: PerspectiveCamera): void {
+  // execute(context: FrameContext, camera: PerspectiveCamera): void {
+  //   const gl = this.gl
+  //   const fbo = this.downscaleFBO.getFBO()
+
+  //   // 1. 渲染到低分辨率 FBO
+  //   // fbo.bind()
+  //   // gl.viewport(0, 0, this.downscaleFBO.width, this.downscaleFBO.height)
+  //   this.downscaleFBO.bind() // bind + viewport(上面两步) 一步到位
+  //   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+  //   for (const targetRenderer of this.targetRenderers) {
+  //     // TODO: draw() 内部的 fbo.bind() 是幂等的重复绑定，无害。draw() 内部的 step ⑧ unbind 后，下一次循环 draw() 的 step ② 会重新 bind
+  //     targetRenderer.draw(context, fbo, camera)
+  //   }
+
+  //   // unbind 虽然和 draw() step ⑧ 的解绑重复了，但代码对称工整
+  //   this.downscaleFBO.unbind(gl.canvas.width, gl.canvas.height)
+
+  //   // 2. 全屏 blit 到默认 framebuffer
+  //   const texture = this.downscaleFBO.getColorTexture()
+  //   if (!texture) return
+
+  //   this.blitShader.use()
+  //   this.blitShader.setTexture2D('uTexture', texture, 0)
+
+  //   gl.disable(gl.DEPTH_TEST) // 关闭深度测试，让 fullScreenQuad 画在最顶层
+  //   // this.fullScreenQuad.bind(gl)
+  //   this.fullScreenQuad.bind(this.blitShader)
+  //   gl.drawElements(gl.TRIANGLES, this.fullScreenQuad.count, this.fullScreenQuad.indexData!.type, 0)
+  //   gl.enable(gl.DEPTH_TEST) // 恢复深度测试，恢复最初始的开启深度测试的状态
+  // }
+
+  execute(
+    context: FrameContext,
+    camera: PerspectiveCamera,
+    renderTargets: RenderTargetScope
+  ): void {
     const gl = this.gl
-    const fbo = this.downscaleFBO.getFBO()
+    const target = this.downscaleFBO.getFBO()
 
-    // 1. 渲染到低分辨率 FBO
-    // fbo.bind()
-    // gl.viewport(0, 0, this.downscaleFBO.width, this.downscaleFBO.height)
-    this.downscaleFBO.bind() // bind + viewport(上面两步) 一步到位
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    renderTargets.withRenderTarget(target, () => {
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    for (const targetRenderer of this.targetRenderers) {
-      // TODO: draw() 内部的 fbo.bind() 是幂等的重复绑定，无害。draw() 内部的 step ⑧ unbind 后，下一次循环 draw() 的 step ② 会重新 bind
-      targetRenderer.draw(context, fbo, camera)
-    }
+      for (const targetRenderer of this.targetRenderers) {
+        targetRenderer.draw(context, camera)
+      }
+    })
 
-    // unbind 虽然和 draw() step ⑧ 的解绑重复了，但代码对称工整
-    this.downscaleFBO.unbind(gl.canvas.width, gl.canvas.height)
-
-    // 2. 全屏 blit 到默认 framebuffer
+    /**
+     * 离开上面的作用域后，自动回到 WebGLRenderer.render 建立的默认目标，
+     * 因此这里的 full-screen blit 会写向 canvas。
+     */
     const texture = this.downscaleFBO.getColorTexture()
     if (!texture) return
 
     this.blitShader.use()
     this.blitShader.setTexture2D('uTexture', texture, 0)
 
-    gl.disable(gl.DEPTH_TEST) // 关闭深度测试，让 fullScreenQuad 画在最顶层
-    // this.fullScreenQuad.bind(gl)
+    gl.disable(gl.DEPTH_TEST)
     this.fullScreenQuad.bind(this.blitShader)
     gl.drawElements(gl.TRIANGLES, this.fullScreenQuad.count, this.fullScreenQuad.indexData!.type, 0)
-    gl.enable(gl.DEPTH_TEST) // 恢复深度测试，恢复最初始的开启深度测试的状态
+    gl.enable(gl.DEPTH_TEST)
   }
 
   resize(width: number, height: number): void {

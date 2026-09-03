@@ -6,7 +6,6 @@ import { mat3, mat4 } from 'gl-matrix'
 import { PerspectiveCamera } from 'three'
 import { FrameContext } from './types/FrameContext'
 import { MeshValidationError } from '@/errors/EngineError/MeshError/MeshValidationError'
-import { FBO } from '@/framebuffers/FBO'
 import { Uniforms } from '@/materials/types/Material'
 
 export abstract class BaseRenderer {
@@ -249,56 +248,55 @@ export abstract class BaseRenderer {
   // ============================================================
   //  主渲染管线
   // ============================================================
-  draw(context: FrameContext, fbo: FBO | null, camera: PerspectiveCamera) {
+  /**
+   * 绘制一个 Mesh，但不选择输出目标。
+   *
+   * 输出目标已经由当前 RenderPass 的 RenderTargetScope 建立。
+   * 这使一组 Mesh 可以共享同一个 pass 级目标，而不是每个 draw 重复 bind/unbind。
+   *
+   * 和 three.js 的联系：
+   * three.js 的 WebGLRenderer 也先建立 render target，再执行对象绘制；
+   * Mesh/Material 不通过一个 FBO 参数决定像素写向哪里。
+   */
+  draw(context: FrameContext, camera: PerspectiveCamera): void {
     const gl = this.gl
 
-    // ① 渲染前计算
+    // ① 渲染前计算。manager 读取本帧数据，但不能切换 RenderTarget。
     for (const manager of this.managers.values()) {
       manager.update(context)
     }
 
-    // ② FBO
-    if (fbo) {
-      fbo.bind()
-    } else {
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-    }
-
-    // ③ Shader
+    // ② Shader
     this.shader.use()
 
-    // ④ 几何数据
-    // this.mesh.bind(gl)
-    // 传 shader 而非 gl：attribute 的 location 是【链接期】由每个 program 各自决定的，
-    // Mesh 需要知道本次绘制用的是哪个 program，才能绑定对应的那个 VAO
+    // ③ 几何数据。VAO 仍按当前 program 绑定。
     this.mesh.bind(this.shader)
 
-    // ⑤ 引擎 uniform
+    // ④ 引擎 uniform
     this.bindCameraParameters(camera)
 
-    // ⑥ 材质 uniform（textureUnitCounter 会随纹理绑定而递增）
-    // 一次 drawElements 执行时，shader 中所有 sampler 必须指向不同的纹理单元，否则后绑的覆盖先绑的。
-    // 但是，跨 renderer 不需要累加！也就是说这里的 context.textureUnitCounter 无论是作为参数还是返回值赋值，都是是错误的做法，因为这会让 textureUnit 在全局累加
-    // context.textureUnitCounter = this.material.applyUniforms(
-    //   gl,
-    //   this.shader,
-    //   context.textureUnitCounter
-    // )
-    // 正确做法，在 applyUniforms 内部累加即可
+    /**
+     * ⑤ 材质 uniform。
+     *
+     * 纹理单元只需在本次材质绑定内从 0 开始；
+     * 不使用 FrameContext.textureUnitCounter 做跨 renderer 全局累加。
+     */
     this.material.applyUniforms(gl, this.shader, 0)
 
-    // ⑦ Draw
+    // ⑥ Draw。它写入哪个 framebuffer，完全取决于外层 pass 已建立的作用域。
     if (this.mesh.hasIndices) {
       gl.drawElements(this.drawMode, this.mesh.count, this.mesh.indexData!.type, 0)
     } else {
       gl.drawArrays(this.drawMode, 0, this.mesh.count)
     }
 
-    // ⑧ 解绑
-    // 回到默认 VAO：那些绕过 Mesh 直接改顶点属性槽位的代码（drawCube / convertHDRToCubeMap）
-    // 于是只会写到默认 VAO 上，碰不到任何 Mesh 自己的 VAO。代价是一次 GL 调用。
+    /**
+     * ⑦ 只恢复本方法自己负责的 VAO。
+     *
+     * 这里不再 gl.bindFramebuffer(null)。BaseRenderer 没有建立 framebuffer
+     * 作用域，因此也没有资格结束它。
+     */
     this.mesh.unbind()
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
   // ============================================================
@@ -306,8 +304,14 @@ export abstract class BaseRenderer {
   // ============================================================
 
   /**
-   * 以 HUD 方式渲染（屏幕角落的坐标轴等）
-   * 独立管线：正交投影 + 禁用深度测试 + 独立小视口
+   * 以 HUD 方式渲染屏幕角落的坐标轴等内容，但不选择输出目标。
+   *
+   * WebGLRenderer.render() 已经为 Overlay 建立默认 framebuffer 作用域；
+   * 本方法只临时改变 viewport 和 depth-test 状态，不能自行绑定 null framebuffer。
+   * 如果未来 Overlay 渲染到其他 RenderTarget，也应由 OverlayRenderPass 声明目标。
+   *
+   * 和 three.js 的联系：
+   * three.js 在 renderer/pass 层选择 render target；单个可绘制对象只提交绘制命令。
    *
    * 其内部会：
    * 1. 保存当前 viewport
@@ -315,7 +319,7 @@ export abstract class BaseRenderer {
    * 3. 禁用深度测试
    * 4. 用正交投影 + 纯旋转视图矩阵
    * 5. 绘制
-   * 6. 恢复 viewport + 深度测试
+   * 6. 恢复 viewport 和深度测试
    */
   renderAsHUD(
     camera: PerspectiveCamera,
@@ -331,8 +335,6 @@ export abstract class BaseRenderer {
     const vpY = currentViewport[1] ?? 0
     const vpW = currentViewport[2] ?? gl.canvas.width
     const vpH = currentViewport[3] ?? gl.canvas.height
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
     // HUD 视口位置
     const screenX = hudPosition.x * vpW
@@ -359,7 +361,6 @@ export abstract class BaseRenderer {
     this.mesh.unbind() // 同 draw()：回到默认 VAO
     gl.enable(gl.DEPTH_TEST)
     gl.viewport(vpX, vpY, vpW, vpH)
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
   private bindHUDCameraParameters(camera: PerspectiveCamera): void {

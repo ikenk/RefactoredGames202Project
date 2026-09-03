@@ -12,6 +12,7 @@ import { MeshRenderer } from '@/renderers/MeshRenderer'
 import { FrameContext } from '@/renderers/types/FrameContext'
 import { PerspectiveCamera } from 'three'
 import { LightNotFoundError } from '@/errors/EngineError/LightError/LightNotFoundError'
+import { RenderTargetScope } from '@/renderers/types/RenderTargetScope'
 
 /**
  * Shadow Render Pass
@@ -254,7 +255,7 @@ export class ShadowRenderPass implements RenderPass {
    * 从场景中
    * @param shadowCasters - castShadow === true 的渲染器（由调用方过滤）
    */
-  execute(_context: FrameContext, _camera: PerspectiveCamera) {
+  execute(_context: FrameContext, _camera: PerspectiveCamera, renderTargets: RenderTargetScope) {
     if (!this.shadowPass || !this.shadowCasterLightId) return
 
     const shadowLight = this.lightSystem.getLight(this.shadowCasterLightId)
@@ -272,7 +273,7 @@ export class ShadowRenderPass implements RenderPass {
 
     switch (shadowLight.type) {
       case 'directional':
-        this.shadowPass.excuteDirectionalLight(shadowLight as DirectionalLight, this.casters)
+        this.shadowPass.drawDirectionalLight(shadowLight as DirectionalLight, this.casters)
         break
       case 'point':
         // TODO: this.shadowPass.executePointLight(light as IPointLight, shadowCasters)

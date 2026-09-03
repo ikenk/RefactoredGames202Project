@@ -48,11 +48,11 @@ export class ShadowPass {
    * @param shadowMapFBO - 该光源对应的 shadow FBO
    * @param shadowCasters - 所有需要投射阴影的渲染器
    */
-  excuteDirectionalLight(light: DirectionalLight, shadowCasters: Iterable<BaseRenderer>) {
+  drawDirectionalLight(light: DirectionalLight, shadowCasters: Iterable<BaseRenderer>) {
     const gl = this.gl
 
     // 1. 绑定 shadow FBO
-    this.shadowMapFBO.bind()
+    // this.shadowMapFBO.bind()
     gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 
     // 2. 使用 shadow shader
@@ -86,8 +86,8 @@ export class ShadowPass {
       }
     }
 
-    // 5. 恢复
-    this.shadowMapFBO.unbind(gl.canvas.width, gl.canvas.height)
+    // // 5. 恢复
+    // this.shadowMapFBO.unbind(gl.canvas.width, gl.canvas.height)
   }
 
   // /** 点光源 shadow pass（预留）：6 个 VP，渲染到 cube shadow map */
