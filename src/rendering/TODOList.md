@@ -33,3 +33,35 @@ Before changing `Resource.dispose()`, add focused tests for the chosen ordering,
 
 - `src/rendering/core/Resource.ts`
 - `tests/unit/rendering/core/Resource.test.ts`
+
+## Geometry topology expansion
+
+**Status:** Deferred. The current static Geometry contract supports `triangles`, `lines`, `line-strip`, and `triangle-strip` only.
+
+### Trigger
+
+Revisit this item only when a later homework or runtime feature actually requires another primitive topology. Starting FFT Ocean by itself is not a trigger: a fullscreen FFT Ocean pass can continue using triangles unless its concrete rendering design requires something else.
+
+### Required implementation scope
+
+Adding `points`, `line-loop`, `triangle-fan`, or another topology requires all of the following changes in the same tested batch:
+
+1. extend `PrimitiveTopology`;
+2. define and test its valid `drawCount` rules;
+3. map it to the corresponding WebGL1 primitive enum in the backend;
+4. add CPU Geometry tests and backend draw tests;
+5. update or remove `TODO(geometry-topology-expansion)` only after the complete path exists.
+
+Do not extend only the TypeScript union. Doing so would let CPU Geometry accept a topology that the backend may not be able to draw correctly.
+
+### Search marker
+
+```text
+TODO(geometry-topology-expansion)
+```
+
+### Related files
+
+- `src/rendering/resources/Geometry.ts`
+- `tests/unit/rendering/resources/Geometry.test.ts`
+- future WebGL1 topology mapping and backend draw tests
